@@ -12,7 +12,7 @@
       <!-- Background Image -->
       <div 
         class="absolute inset-0 bg-cover bg-center z-0"
-        style="background-image: url('\assets\Fiesta-Resort-bg.jpg')"
+        style="background-image: url('https://images.unsplash.com/photo-1540541338287-41700207dee6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')"
       >
       </div>
 

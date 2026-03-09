@@ -92,6 +92,15 @@
             >
               Register
             </button>
+
+            <div class="text-center mt-6">
+              <p class="text-gray-500 text-base">
+                Already have an account? 
+                <Link href="/login" class="text-[#00B4FF] hover:underline">
+                  Login here
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>
@@ -100,7 +109,7 @@
 </template>
 
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm,  Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
 const hasError = ref(false);
