@@ -4,7 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return Inertia::render('auth/Login');
+    return Inertia::render('client/Dashboard');
 });
 
 Route::get('/login', function () {
