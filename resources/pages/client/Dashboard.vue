@@ -1,4 +1,5 @@
 <template>
+
   <div class="min-h-screen bg-white font-sans text-gray-800">
     <header class="bg-white py-4 px-4 md:px-8 shadow-sm z-20 sticky top-0">
       <div class="flex items-center justify-between">
@@ -26,6 +27,7 @@
 
     <main class="w-full">
 
+      <!-- Overview Section -->
         <section id="first-section" class="bg-white pt-8 pb-12">
             <div class="w-full bg-[#F9FAFB] shadow-xl border-t border-b border-gray-100">
                 
@@ -89,23 +91,24 @@
                       </div>
                   </div>
 
-                    <div class="flex-1 relative group w-full max-w-[850px]">
+                    <div class="flex-1 relative group w-full max-w-850px">
                         <div class="absolute -inset-4 bg-blue-100/30 rounded-[4rem] blur-2xl group-hover:bg-blue-200/40 transition-all duration-500"></div>
                         <img 
                         src="https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=1200&q=80" 
                         alt="Resort Pool" 
-                        class="relative rounded-[4rem] shadow-2xl w-full object-cover h-[500px] xl:h-[600px] border-[6px] border-white transition-transform duration-500 group-hover:scale-[1.02]"
+                        class="relative rounded-[4rem] shadow-2xl w-full object-cover h-500px xl:h-600px border-[6px] border-white transition-transform duration-500 group-hover:scale-[1.02]"
                         />
                     </div>
               </div>
             </div>
         </section>
     
+        <!-- Bookings and Rooms Section -->
         <section id="second-section" class="bg-[#ffffff]">
           <section id="booking" class="py-16 px-8 md:px-16">
             <div class="max-w-7xl mx-auto">
-              <div class="bg-[#dff7ff] p-8 rounded-[2rem] shadow-sm flex flex-wrap items-end gap-6">
-                <div class="flex-1 min-w-[200px]">
+              <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6">
+                <div class="flex-1 min-w-200px">
                   <label class="block text-gray-700 font-medium mb-2 pl-2 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -115,7 +118,7 @@
                   <input type="date" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none" />
                 </div>
 
-              <div class="flex-1 min-w-[200px]">
+              <div class="flex-1 min-w-200px">
                 <label class="block text-gray-700 font-medium mb-2 pl-2 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -167,15 +170,279 @@
         </section>
         </section>
 
-      <section id="about" class="h-screen bg-white"> </section>
-      <section id="experience" class="h-screen bg-gray-50"> </section>
-      <section id="treasures" class="h-screen bg-white"> </section>
-      <section id="contact" class="h-screen bg-gray-50"> </section>
+        <!-- About Us Section -->
+        <section id="third-section" class="bg-white">
+          <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+            <h1 class="text-4xl font-bold text-[#55A8D1] mb-8">About Us</h1>
+            
+            <div class="flex gap-8 items-center">
+              <!-- Image -->
+              <div class="flex-shrink-0">
+                <img 
+                  :src="resortPoolImage" 
+                  alt="Fiesta Resort Pool"
+                  class="rounded-lg shadow-lg w-96 h-64 object-cover border-4 border-blue-300"
+                />
+              </div>
+              
+              <!-- Welcome Text -->
+              <div class="flex-1">
+                <p class="text-gray-400 text-lg leading-relaxed">
+                  Welcome to Fiesta Resort, Surigao City. Nestled along the scenic coast of Surigao City. 
+                  Fiesta Resort is your perfect escape for relaxation, adventure, and authentic island hospitality.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Our Resort Experience Section -->
+        <section id="fourth-section" class="bg-white">
+          <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+            <h2 class="text-3xl font-bold text-[#55A8D1] mb-8">Our Resort Experience</h2>
+            
+            <div class="space-y-4">
+              <p class="text-gray-400 text-lg">
+                At Fiesta Resort, we take pride in creating a warm and relaxing atmosphere for every guest.
+              </p>
+              
+              <p class="text-gray-400 text-lg">
+                Guest can indulge in local Surigaonon cuisine at our on site restaurant, often accompanied 
+                by a free breakfast to start your day bright.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Discover Surigao's Natural Treasures Section -->
+        <section id="fifth-section" class="bg-white">
+          <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+            <h2 class="text-3xl font-bold text-[#55A8D1] mb-8">Discover Surigao's Natural Treasures</h2>
+            
+            <div class="flex gap-12 items-start">
+              <!-- Left Content -->
+              <div class="flex-1">
+                <p class="text-gray-400 text-lg mb-8">
+                  Fiesta Resort is more than just a place to stay – It's your gateway to Surigao's 
+                  vibrant eco-tourism scene:
+                </p>
+                
+                <div class="space-y-6">
+                  <!-- Island Hopping -->
+                  <div>
+                    <h3 class="font-bold text-[#55A8D1] text-lg">Island Hopping:</h3>
+                    <p class="text-gray-400 ml-4">
+                      Explore Basul and Hikdop Islands for snorkeling, kayaking, and beach adventures.
+                    </p>
+                  </div>
+                  
+                  <!-- Mangrove Exploration -->
+                  <div>
+                    <h3 class="font-bold text-[#55A8D1] text-lg">Mangrove Exploration:</h3>
+                    <p class="text-gray-400 ml-4">
+                      Cruise through the waterways of the Day-asan Mangrove Forest.
+                    </p>
+                  </div>
+                  
+                  <!-- Inland Excursions -->
+                  <div>
+                    <h3 class="font-bold text-[#55A8D1] text-lg">Inland Excursions:</h3>
+                    <p class="text-gray-400 ml-4">
+                      Take a refreshing dip at Songkoy Cold Spring or visit the Rock and Mineral Museum
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Right Image -->
+              <div class="flex-shrink-0">
+                <img 
+                  :src="mangroveImage" 
+                  alt="Surigao Natural Treasures"
+                  class="rounded-lg shadow-lg w-96 h-80 object-cover border-4 border-blue-400"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white">
+          <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+            <!-- Relax, Explore, and Experience Local Life -->
+            <div class="mb-12">
+              <h2 class="text-3xl font-bold text-[#55A8D1] mb-8">Relax, Explore, and Experience Local Life</h2>
+              <p class="text-gray-400 text-lg">
+                Whether you're enjoying a peaceful afternoon by the pool, strolling along the Surigao City Boulevard, or discovering 
+                hidden gems across the islands, Fiesta Resort provides a balance of relaxation, culture, and adventure.
+              </p>
+            </div>
+
+            <!-- Your Surigao Getaway Awaits -->
+            <div>
+              <h2 class="text-3xl font-bold text-[#55A8D1] mb-8 mt-25">Your Surigao Getaway Awaits</h2>
+              <p class="text-gray-400 text-lg mb-8">
+                At Fiesta Resort, every day feels like a destination. Let us be your home as you discover the beauty, culture, and 
+                simplistic charm of Surigao City.
+              </p>
+              
+              <!-- Image -->
+              <div class="flex justify-center">
+                <img 
+                  :src="getawayImage" 
+                  alt="Your Surigao Getaway"
+                  class="rounded-3xl shadow-lg w-full max-w-2xl h-80 object-cover border-4 border-blue-400 mt-15"
+                />
+              </div>
+            </div>
+        </div>
+      </section>
+
+      <section id="sixth-section" class="bg-white pt-8 pb-12">
+        <div class="w-full bg-[#F9FAFB] shadow-xl border-t border-b border-gray-100">
+          <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
+            <!-- Contact Us Title -->
+            <h1 class="text-5xl font-bold text-[#55A8D1] text-center mb-12">Contact Us</h1>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <!-- Left Side - Get in Touch -->
+          <div>
+            <h2 class="text-3xl font-bold text-[#55A8D1] mb-4">Get in Touch</h2>
+            <p class="text-gray-400 text-lg mb-8">
+              We're here to help and answer any question you might have.
+            </p>
+
+            <!-- Address -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Address</h3>
+              <p class="text-gray-400">
+                Sitio Dacuman, Barangay Ipil<br />
+                Surigao City, Surigao del Norte, 8400<br />
+                Philippines
+              </p>
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Phone</h3>
+              <p class="text-gray-400">
+                (+63)912-345-6789<br />
+                (+63)998-765-4321
+              </p>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-8">
+              <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Email</h3>
+              <p class="text-gray-400">
+                info@fiestasort.com<br />
+                bookings@fiestasort.come
+              </p>
+            </div>
+
+            <!-- Business Hours -->
+            <div>
+              <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Business Hours</h3>
+              <p class="text-gray-400">
+                Monday - Friday: 9:00 AM - 6:00 PM<br />
+                Saturday - Sunday: 10:00 AM - 4:00 PM
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Side - Contact Form -->
+          <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+            <h2 class="text-3xl font-bold text-[#55A8D1] mb-6">Send us a Message</h2>
+
+            <form @submit.prevent="handleSubmit" class="space-y-6">
+              <!-- Full Name -->
+              <div>
+                <label class="block text-gray-700 font-semibold mb-2">Full Name:</label>
+                <input 
+                  v-model="form.fullName"
+                  type="text" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#00B4FF] transition-colors"
+                  placeholder="Enter your full name"
+                />
+              </div>
+
+              <!-- Email -->
+              <div>
+                <label class="block text-gray-700 font-semibold mb-2">Email:</label>
+                <input 
+                  v-model="form.email"
+                  type="email" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#00B4FF] transition-colors"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <!-- Phone Number -->
+              <div>
+                <label class="block text-gray-700 font-semibold mb-2">Phone Number:</label>
+                <input 
+                  v-model="form.phoneNumber"
+                  type="tel" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#00B4FF] transition-colors"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+
+              <!-- Subject -->
+              <div>
+                <label class="block text-gray-700 font-semibold mb-2">Subject:</label>
+                <input 
+                  v-model="form.subject"
+                  type="text" 
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#00B4FF] transition-colors"
+                  placeholder="Enter subject"
+                />
+              </div>
+
+              <!-- Message -->
+              <div>
+                <label class="block text-gray-700 font-semibold mb-2">Subject:</label>
+                <textarea 
+                  v-model="form.message"
+                  class="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-[#00B4FF] transition-colors h-32 resize-none"
+                  placeholder="Enter your message"
+                ></textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <button 
+                type="submit"
+                class="w-full bg-[#00B4FF] hover:bg-[#009CE0] text-white font-bold py-3 rounded-lg transition-colors"
+              >
+                Send a Message
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+      </section>
 
     </main>
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
+import resortPoolImage from '../assets/FiestaResort1.jpg';
+import getawayImage from '../assets/FiestaResort4.jpg';
+import mangroveImage from '../assets/FiestaResort5.jpg';
+
+const form = ref({
+  fullName: '',
+  email: '',
+  phoneNumber: '',
+  subject: '',
+  message: ''
+});
+
+const handleSubmit = () => {
+  console.log('Form submitted:', form.value);
+  // Add your form submission logic here
+};
 </script>
