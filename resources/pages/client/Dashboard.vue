@@ -10,17 +10,39 @@
         </div>
 
         <nav class="hidden lg:flex items-center gap-10 text-lg font-medium text-gray-600 flex-1 justify-center">
-          <a href="#" class="hover:text-[#00B4FF] transition-colors">Home</a>
-          <a href="#" class="hover:text-[#00B4FF] transition-colors">Rooms</a>
-          <a href="#" class="hover:text-[#00B4FF] transition-colors">My Bookings</a>
-          <a href="#" class="hover:text-[#00B4FF] transition-colors">About</a>
-          <a href="#" class="hover:text-[#00B4FF] transition-colors">Contact</a>
+          <a href="#Home" @click.prevent="scrollToSection('first-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Home</a>
+          <a href="#Rooms" @click.prevent="scrollToSection('second-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Rooms</a>
+          <a href="#Booking" @click.prevent="scrollToSection('booking')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">My Bookings</a>
+          <a href="#About" @click.prevent="scrollToSection('third-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">About</a>
+          <a href="#contact" @click.prevent="scrollToSection('sixth-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Contact</a>
         </nav>
 
         <div class="flex-1 flex justify-end">
-          <Link href="/login" class="px-8 py-2 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors">
+          <div v-if="user" class="flex items-center gap-3 px-6 py-2 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer" @click="showLogoutModal = true">
+            <div class="w-8 h-8 bg-[#00B4FF] rounded-full flex items-center justify-center text-white font-bold text-sm">
+              {{ user.name.charAt(0).toUpperCase() }}
+            </div>
+            <span class="text-gray-600 font-semibold">Welcome back, {{ user.name.split(' ').length === 2 ? user.name.split(' ')[0] : user.name.split(' ').slice(0, 2).join(' ') }}</span>
+          </div>
+          <Link v-else href="/login" class="px-8 py-2 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold hover:bg-gray-50 transition-colors">
             Login
           </Link>
+        </div>
+        
+        <!-- Logout Modal -->
+        <div v-if="showLogoutModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-8 max-w-sm shadow-2xl">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Confirm Logout</h2>
+            <p class="text-gray-600 mb-6">Are you sure you want to log out of your account?</p>
+            <div class="flex gap-4">
+              <button @click="showLogoutModal = false" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <Link href="/logout" method="post" as="button" @click="showLogoutModal = false" class="flex-1 px-4 py-2 bg-[#00B4FF] hover:bg-[#009CE0] text-white rounded-lg font-semibold transition-colors">
+                Logout
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -56,7 +78,7 @@
                                   </svg>
                               </div>
                               <div class="flex flex-col">
-                                  <span class="text-3xl font-black text-gray-800 leading-none">0</span>
+                                  <span class="text-3xl font-black text-gray-800 leading-none">{{ usersCount }}</span>
                                   <div class="w-12 h-1 bg-red-200 my-2 rounded-full"></div>
                                   <p class="text-red-400 font-semibold italic text-sm tracking-wider uppercase">Users</p>
                               </div>
@@ -433,6 +455,28 @@ import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
 import mangroveImage from '../assets/FiestaResort5.jpg';
 
+// define props to recieve data from the backend
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null
+  },
+  usersCount: {
+    type: Number,
+    default: 0
+  }
+});
+
+const scrollToSection = (sectionId) => {
+  const element = document.getElementById(sectionId);
+  const header = document.querySelector('header');
+  if (element && header) {
+    const headerHeight = header.offsetHeight; // Dynamically get header height
+    const offsetTop = element.offsetTop - headerHeight;
+    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+  }
+};
+
 const form = ref({
   fullName: '',
   email: '',
@@ -445,4 +489,6 @@ const handleSubmit = () => {
   console.log('Form submitted:', form.value);
   // Add your form submission logic here
 };
+
+const showLogoutModal = ref(false);
 </script>

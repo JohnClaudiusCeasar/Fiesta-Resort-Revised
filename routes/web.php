@@ -3,6 +3,7 @@
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 
 // Dashboard Page Route
 Route::get('/', function () {
@@ -22,3 +23,6 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware('auth')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
+
+// Dashboard
+Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
