@@ -1,5 +1,5 @@
 <template>
-
+ 
   <div class="min-h-screen bg-white font-sans text-gray-800">
     <header class="bg-white py-4 px-4 md:px-8 shadow-sm z-20 sticky top-0">
       <div class="flex items-center justify-between">
@@ -8,7 +8,7 @@
             <span class="text-[#00B4FF]">Fiesta</span> <span class="text-black">Resort</span>
           </h1>
         </div>
-
+ 
         <nav class="hidden lg:flex items-center gap-10 text-lg font-medium text-gray-600 flex-1 justify-center">
           <a href="#Home" @click.prevent="scrollToSection('first-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Home</a>
           <a href="#Rooms" @click.prevent="scrollToSection('second-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Rooms</a>
@@ -16,7 +16,7 @@
           <a href="#About" @click.prevent="scrollToSection('third-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">About</a>
           <a href="#contact" @click.prevent="scrollToSection('sixth-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Contact</a>
         </nav>
-
+ 
         <div class="flex-1 flex justify-end">
           <div v-if="user" class="flex items-center gap-3 px-6 py-2 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer" @click="showLogoutModal = true">
             <div class="w-8 h-8 bg-[#00B4FF] rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -46,9 +46,9 @@
         </div>
       </div>
     </header>
-
+ 
     <main class="w-full">
-
+ 
       <!-- Overview Section -->
         <section id="first-section" class="bg-white pt-8 pb-12">
             <div class="w-full bg-[#F9FAFB] shadow-xl border-t border-b border-gray-100">
@@ -64,11 +64,11 @@
                               We provide what you need to enjoy your holidays with family. Time to make another memorable moment.
                           </p>
                       </div>
-
+ 
                       <button class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-5 rounded-2xl text-2xl font-bold shadow-xl shadow-blue-100/50 transition-all hover:-translate-y-1 active:scale-95">
                       Show More
                       </button>
-
+ 
                       <div class="flex flex-wrap gap-12 pt-6 w-full max-w-2xl">
               
                           <div class="flex items-center gap-5 group">
@@ -83,21 +83,21 @@
                                   <p class="text-red-400 font-semibold italic text-sm tracking-wider uppercase">Users</p>
                               </div>
                           </div>
-
+ 
                           <div class="flex items-center gap-5 group">
                               <div class="bg-[#E0F2FE] p-4 rounded-2xl shadow-sm border border-blue-50 transition-transform group-hover:scale-105">
                                   <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-blue-400">
                                       <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
                                   </svg>
                               </div>
-
+ 
                               <div class="flex flex-col">
                                   <span class="text-3xl font-black text-gray-800 leading-none">0</span>
                                   <div class="w-12 h-1 bg-blue-200 my-2 rounded-full"></div>
                                   <p class="text-blue-400 font-semibold italic text-sm tracking-wider uppercase">Rooms</p>
                               </div>
                           </div>
-
+ 
                           <div class="flex items-center gap-5 group">
                               <div class="bg-[#FEF3C7] p-4 rounded-2xl shadow-sm border border-yellow-100 transition-transform group-hover:scale-105">
                                   <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-10 h-10 text-yellow-500">
@@ -112,7 +112,7 @@
                           </div>
                       </div>
                   </div>
-
+ 
                     <div class="flex-1 relative group w-full max-w-850px">
                         <div class="absolute -inset-4 bg-blue-100/30 rounded-[4rem] blur-2xl group-hover:bg-blue-200/40 transition-all duration-500"></div>
                         <img 
@@ -130,6 +130,7 @@
           <section id="booking" class="py-16 px-8 md:px-16">
             <div class="max-w-7xl mx-auto">
               <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6">
+                
                 <div class="flex-1 min-w-200px">
                   <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
@@ -137,19 +138,43 @@
                     </svg>
                     Check In
                   </label>
-                  <input type="date" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none" />
+                  <input 
+                    type="text" 
+                    :value="checkInDate" 
+                    @click="checkInCalendarOpen = true"
+                    placeholder="Select date"
+                    readonly
+                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors" 
+                  />
+                  <FiestaCalendar 
+                    v-model="checkInDate"
+                    :isOpen="checkInCalendarOpen"
+                    @update:isOpen="checkInCalendarOpen = $event"
+                  />
                 </div>
-
-              <div class="flex-1 min-w-200px">
-                <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                  </svg>
-                  Check Out
-                </label>
-                <input type="date" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none" />
-              </div>
-
+ 
+                <div class="flex-1 min-w-200px">
+                  <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                    Check Out
+                  </label>
+                  <input 
+                    type="text" 
+                    :value="checkOutDate" 
+                    @click="checkOutCalendarOpen = true"
+                    placeholder="Select date"
+                    readonly
+                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors" 
+                  />
+                  <FiestaCalendar 
+                    v-model="checkOutDate"
+                    :isOpen="checkOutCalendarOpen"
+                    @update:isOpen="checkOutCalendarOpen = $event"
+                  />
+                </div>
+ 
               <div class="flex-1 min-w-200px">
                 <label class="text-gray-700 font-medium mb-2 pl-2 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
@@ -162,14 +187,14 @@
                   <option>3</option>
                 </select>
               </div>
-
+ 
               <button class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all">
                 Search
               </button>
             </div>
           </div>
         </section>
-
+ 
         <section id="rooms" class="bg-white pt-8 pb-12">
             <div class="w-full bg-[#F9FAFB] shadow-xl border-t border-b border-gray-100">
                 
@@ -191,7 +216,7 @@
             </div>
         </section>
         </section>
-
+ 
         <!-- About Us Section -->
         <section id="third-section" class="bg-white">
           <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
@@ -217,7 +242,7 @@
             </div>
           </div>
         </section>
-
+ 
         <!-- Our Resort Experience Section -->
         <section id="fourth-section" class="bg-white">
           <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
@@ -235,7 +260,7 @@
             </div>
           </div>
         </section>
-
+ 
         <!-- Discover Surigao's Natural Treasures Section -->
         <section id="fifth-section" class="bg-white">
           <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
@@ -287,7 +312,7 @@
             </div>
           </div>
         </section>
-
+ 
         <section class="bg-white">
           <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
             <!-- Relax, Explore, and Experience Local Life -->
@@ -298,7 +323,7 @@
                 hidden gems across the islands, Fiesta Resort provides a balance of relaxation, culture, and adventure.
               </p>
             </div>
-
+ 
             <!-- Your Surigao Getaway Awaits -->
             <div>
               <h2 class="text-3xl font-bold text-[#55A8D1] mb-8 mt-25">Your Surigao Getaway Awaits</h2>
@@ -318,13 +343,13 @@
             </div>
         </div>
       </section>
-
+ 
       <section id="sixth-section" class="bg-white pt-8 pb-12">
         <div class="w-full bg-[#F9FAFB] shadow-xl border-t border-b border-gray-100">
           <div class="max-w-7xl mx-auto px-4 md:px-8 py-12">
             <!-- Contact Us Title -->
             <h1 class="text-5xl font-bold text-[#55A8D1] text-center mb-12">Contact Us</h1>
-
+ 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <!-- Left Side - Get in Touch -->
           <div>
@@ -332,7 +357,7 @@
             <p class="text-gray-400 text-lg mb-8">
               We're here to help and answer any question you might have.
             </p>
-
+ 
             <!-- Address -->
             <div class="mb-8">
               <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Address</h3>
@@ -342,7 +367,7 @@
                 Philippines
               </p>
             </div>
-
+ 
             <!-- Phone -->
             <div class="mb-8">
               <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Phone</h3>
@@ -351,7 +376,7 @@
                 (+63)998-765-4321
               </p>
             </div>
-
+ 
             <!-- Email -->
             <div class="mb-8">
               <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Email</h3>
@@ -360,7 +385,7 @@
                 bookings@fiestasort.come
               </p>
             </div>
-
+ 
             <!-- Business Hours -->
             <div>
               <h3 class="text-xl font-bold text-[#55A8D1] italic mb-3">Business Hours</h3>
@@ -370,11 +395,11 @@
               </p>
             </div>
           </div>
-
+ 
           <!-- Right Side - Contact Form -->
           <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
             <h2 class="text-3xl font-bold text-[#55A8D1] mb-6">Send us a Message</h2>
-
+ 
             <form @submit.prevent="handleSubmit" class="space-y-6">
               <!-- Full Name -->
               <div>
@@ -386,7 +411,7 @@
                   placeholder="Enter your full name"
                 />
               </div>
-
+ 
               <!-- Email -->
               <div>
                 <label class="block text-gray-700 font-semibold mb-2">Email:</label>
@@ -397,7 +422,7 @@
                   placeholder="Enter your email"
                 />
               </div>
-
+ 
               <!-- Phone Number -->
               <div>
                 <label class="block text-gray-700 font-semibold mb-2">Phone Number:</label>
@@ -408,7 +433,7 @@
                   placeholder="Enter your phone number"
                 />
               </div>
-
+ 
               <!-- Subject -->
               <div>
                 <label class="block text-gray-700 font-semibold mb-2">Subject:</label>
@@ -419,7 +444,7 @@
                   placeholder="Enter subject"
                 />
               </div>
-
+ 
               <!-- Message -->
               <div>
                 <label class="block text-gray-700 font-semibold mb-2">Subject:</label>
@@ -429,7 +454,7 @@
                   placeholder="Enter your message"
                 ></textarea>
               </div>
-
+ 
               <!-- Submit Button -->
               <button 
                 type="submit"
@@ -443,18 +468,19 @@
       </div>
       </div>
       </section>
-
+ 
     </main>
   </div>
 </template>
-
+ 
 <script setup>
 import { ref } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
 import mangroveImage from '../assets/FiestaResort5.jpg';
-
+import FiestaCalendar from './FiestaCalendar.vue'; 
+ 
 // define props to recieve data from the backend
 const props = defineProps({
   user: {
@@ -466,7 +492,7 @@ const props = defineProps({
     default: 0
   }
 });
-
+ 
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId);
   const header = document.querySelector('header');
@@ -476,7 +502,7 @@ const scrollToSection = (sectionId) => {
     window.scrollTo({ top: offsetTop, behavior: 'smooth' });
   }
 };
-
+ 
 const form = ref({
   fullName: '',
   email: '',
@@ -484,11 +510,16 @@ const form = ref({
   subject: '',
   message: ''
 });
-
+ 
 const handleSubmit = () => {
   console.log('Form submitted:', form.value);
   // Add your form submission logic here
 };
-
+ 
+// Calendar state and handlers
 const showLogoutModal = ref(false);
+const checkInDate = ref('');
+const checkOutDate = ref('');
+const checkInCalendarOpen = ref(false);
+const checkOutCalendarOpen = ref(false);
 </script>
