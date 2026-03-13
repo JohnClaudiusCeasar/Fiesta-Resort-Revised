@@ -43,12 +43,13 @@
             v-for="(day, index) in calendarDays"
             :key="index"
             @click="selectDate(day)"
-            :disabled="!day"
+            :disabled="!day || isPastDate(day)"
             :class="[
               'calendar-day',
               {
                 'is-selected': isSelected(day),
-                'is-empty': !day
+                'is-empty': !day,
+                'is-past': isPastDate(day)
               }
             ]"
           >
@@ -100,6 +101,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'update:isOpen', 'date-selected']);
 
 // Initialize with today's date
+const today = ref(new Date());
 const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
 
@@ -118,6 +120,21 @@ const getDaysInMonth = (date) => {
 
 const getFirstDayOfMonth = (date) => {
   return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+};
+
+// Check if a date is in the past
+const isPastDate = (day) => {
+  if (!day) return false;
+  const dateToCheck = new Date(
+    currentDate.value.getFullYear(),
+    currentDate.value.getMonth(),
+    day
+  );
+  // Set time to midnight for accurate comparison
+  dateToCheck.setHours(0, 0, 0, 0);
+  const todayMidnight = new Date(today.value);
+  todayMidnight.setHours(0, 0, 0, 0);
+  return dateToCheck < todayMidnight;
 };
 
 const calendarDays = computed(() => {
@@ -152,7 +169,7 @@ const nextMonth = () => {
 };
 
 const selectDate = (day) => {
-  if (day) {
+  if (day && !isPastDate(day)) {
     selectedDate.value = new Date(
       currentDate.value.getFullYear(),
       currentDate.value.getMonth(),
@@ -186,24 +203,33 @@ const confirm = () => {
   position: relative;
 }
 
-/* Calendar Popup Overlay */
+/* Calendar Dropdown Popup */
 .fiesta-calendar-popup {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+  background-color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 50;
-  animation: fadeIn 0.2s ease-out;
+  animation: slideDown 0.2s ease-out;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 360px;
+  overflow: hidden;
 }
 
-@keyframes fadeIn {
+@keyframes slideDown {
   from {
     opacity: 0;
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -211,21 +237,11 @@ const confirm = () => {
   background: white;
   border-radius: 1.5rem;
   padding: 1.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 360px;
-  width: 90%;
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  width: 100%;
+  animation: slideDown 0.3s ease-out;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
 }
 
 /* Calendar Header */
@@ -242,7 +258,7 @@ const confirm = () => {
   background-color: transparent;
   border: none;
   cursor: pointer;
-  color: #4b5563;
+  color: #599bf9;
   transition: all 0.2s ease-out;
 }
 
@@ -273,9 +289,13 @@ const confirm = () => {
   text-align: center;
   font-size: 0.75rem;
   font-weight: 600;
-  color: #4b5563;
-  padding: 0.75rem;
-  background: linear-gradient(to bottom right, #f9fafb, #f3f4f6);
+  color: white;
+  padding: 0;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #78d7ff, #b8e8fd);
   border-radius: 0.5rem;
 }
 
@@ -312,6 +332,18 @@ const confirm = () => {
 .calendar-day.is-empty {
   cursor: default;
   color: #d1d5db;
+}
+
+.calendar-day.is-past {
+  color: #9ca3af;
+  cursor: not-allowed;
+  background-color: #e7e7e7;
+}
+
+.calendar-day.is-past:hover {
+  transform: none;
+  background-color: #e7e7e7;
+  color: #9ca3af;
 }
 
 .calendar-day.is-selected {

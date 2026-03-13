@@ -131,7 +131,7 @@
             <div class="max-w-7xl mx-auto">
               <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6">
                 
-                <div class="flex-1 min-w-200px">
+                <div class="flex-1 min-w-200px relative booking-section-checkin">
                   <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -153,7 +153,7 @@
                   />
                 </div>
  
-                <div class="flex-1 min-w-200px">
+                <div class="flex-1 min-w-200px relative booking-section-checkout">
                   <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -474,7 +474,7 @@
 </template>
  
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
@@ -515,6 +515,27 @@ const handleSubmit = () => {
   console.log('Form submitted:', form.value);
   // Add your form submission logic here
 };
+
+// Close both calendars when clicking outside
+const closeCalendars = (e) => {
+  const checkInContainer = document.querySelector('.booking-section-checkin');
+  const checkOutContainer = document.querySelector('.booking-section-checkout');
+  
+  if (checkInContainer && !checkInContainer.contains(e.target)) {
+    checkInCalendarOpen.value = false;
+  }
+  if (checkOutContainer && !checkOutContainer.contains(e.target)) {
+    checkOutCalendarOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', closeCalendars);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeCalendars);
+});
  
 // Calendar state and handlers
 const showLogoutModal = ref(false);
