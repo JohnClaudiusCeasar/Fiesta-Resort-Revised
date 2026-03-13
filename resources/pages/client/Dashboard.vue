@@ -132,7 +132,7 @@
               <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6">
                 
                 <div class="flex-1 min-w-200px relative booking-section-checkin">
-                  <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
+                  <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                     </svg>
@@ -154,7 +154,7 @@
                 </div>
  
                 <div class="flex-1 min-w-200px relative booking-section-checkout">
-                  <label class="block text-gray-700 font-medium mb-2 pl-2 items-center gap-2">
+                  <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
                     <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                     </svg>
@@ -176,16 +176,13 @@
                 </div>
  
               <div class="flex-1 min-w-200px">
-                <label class="text-gray-700 font-medium mb-2 pl-2 flex items-center gap-2">
+                <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
                   <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                   </svg>
-                  Persons
+                  Guests & Rooms
                 </label>
-                <select class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none appearance-none">
-                  <option>2</option>
-                  <option>3</option>
-                </select>
+                <GuestSelector />
               </div>
  
               <button class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all">
@@ -479,7 +476,8 @@ import { Link } from '@inertiajs/vue3';
 import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
 import mangroveImage from '../assets/FiestaResort5.jpg';
-import FiestaCalendar from './FiestaCalendar.vue'; 
+import FiestaCalendar from './FiestaCalendar.vue';
+import GuestSelector from './GuestSelector.vue'; 
  
 // define props to recieve data from the backend
 const props = defineProps({
