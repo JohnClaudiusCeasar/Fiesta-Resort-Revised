@@ -4,8 +4,9 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
 
-// Dashboard Page Route
+// Guest Dashboard
 Route::get('/', function () {
     return Inertia::render('client/Dashboard');
 });
@@ -24,5 +25,11 @@ Route::middleware('auth')->group(function(){
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Dashboard
+// Client Routes
+// Client Dashboard (After Authentication)
 Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
+
+// Admin Routes
+Route::get('/admin/{any?}', [AdminController::class, 'show'])
+    ->where('any', '.*')
+    ->name('admin');
