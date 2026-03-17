@@ -53,9 +53,9 @@
           <div class="page-title" style="font-size:15px;">Recent Bookings</div>
           <div class="page-subtitle" style="font-size:12px; margin-top:2px;">Latest 5 reservations</div>
         </div>
-        <a href="/admin/bookings" class="btn btn-secondary" style="font-size:12.5px; padding:6px 14px;">
+        <Link href="/admin/bookings" class="btn btn-secondary" style="font-size:12.5px; padding:6px 14px;">
           View All →
-        </a>
+        </Link>
       </div>
 
       <div class="admin-table-wrap">
@@ -102,15 +102,16 @@
 </template>
 
 <script>
-import AdminLayout from '~/components/AdminLayout.vue'
+import AdminLayout from '../../components/AdminLayout.vue'
+import { Link } from "@inertiajs/vue3";
 
 export default {
   name: 'AdminOverview',
-  components: { AdminLayout },
+  components: { AdminLayout, Link },
 
   data() {
     return {
-      // Placeholder stats — replace with API calls in the next session
+      // Placeholder stats — replace with API calls later
       stats: {
         todayBookings: 8,
         availableRooms: 12,
@@ -121,11 +122,11 @@ export default {
 
       // Placeholder recent bookings — replace with API call
       recentBookings: [
-        { id: '00124', guest: 'Maria Santos',   room: 'Deluxe Suite 301', checkIn: 'Mar 17', checkOut: 'Mar 20', status: 'Confirmed'   },
-        { id: '00123', guest: 'Juan Dela Cruz',  room: 'Standard Room 102', checkIn: 'Mar 17', checkOut: 'Mar 18', status: 'Checked In' },
-        { id: '00122', guest: 'Ana Reyes',       room: 'Family Suite 205',  checkIn: 'Mar 16', checkOut: 'Mar 19', status: 'Checked In' },
-        { id: '00121', guest: 'Carlo Mendoza',   room: 'Standard Room 104', checkIn: 'Mar 15', checkOut: 'Mar 17', status: 'Checked Out'},
-        { id: '00120', guest: 'Liza Fernandez',  room: 'Deluxe Room 208',   checkIn: 'Mar 18', checkOut: 'Mar 22', status: 'Pending'    },
+        { id: '00124', guest: 'Maria Santos',   room: 'Deluxe Suite 301',   checkIn: 'Mar 17', checkOut: 'Mar 20', status: 'Confirmed'   },
+        { id: '00123', guest: 'Juan Dela Cruz',  room: 'Standard Room 102', checkIn: 'Mar 17', checkOut: 'Mar 18', status: 'Checked In'  },
+        { id: '00122', guest: 'Ana Reyes',       room: 'Family Suite 205',  checkIn: 'Mar 16', checkOut: 'Mar 19', status: 'Checked In'  },
+        { id: '00121', guest: 'Carlo Mendoza',   room: 'Standard Room 104', checkIn: 'Mar 15', checkOut: 'Mar 17', status: 'Checked Out' },
+        { id: '00120', guest: 'Liza Fernandez',  room: 'Deluxe Room 208',   checkIn: 'Mar 18', checkOut: 'Mar 22', status: 'Pending'     },
       ]
     }
   },

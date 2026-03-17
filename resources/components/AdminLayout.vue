@@ -1,70 +1,66 @@
 <template>
   <div class="admin-shell">
-
+ 
     <!-- ── Sidebar ─────────────────────────── -->
     <aside class="admin-sidebar">
-
+ 
       <!-- Brand -->
       <div class="sidebar-brand">
-        <a href="/admin" class="sidebar-brand-logo">
+        <link href="/admin" class="sidebar-brand-logo">
           <div class="brand-icon">🌴</div>
           <div class="brand-text">
             <span class="brand-name">Fiesta Resort</span>
             <span class="brand-sub">Admin Panel</span>
           </div>
-        </a>
+        </link>
       </div>
-
+ 
       <!-- Navigation -->
       <nav class="sidebar-nav">
-
+ 
         <div class="nav-section-label">Main</div>
-
-        <a
+ 
+        <Link
           href="/admin"
           class="nav-item"
           :class="{ active: currentPage === 'overview' }"
-          @click.prevent="navigate('overview')"
         >
           <span class="nav-icon">📊</span>
           Overview
-        </a>
-
+        </Link>
+ 
         <div class="nav-section-label">Management</div>
-
-        <a
+ 
+        <Link
           href="/admin/bookings"
           class="nav-item"
           :class="{ active: currentPage === 'bookings' }"
-          @click.prevent="navigate('bookings')"
         >
           <span class="nav-icon">📅</span>
           Bookings
           <span v-if="pendingCount > 0" class="nav-badge">{{ pendingCount }}</span>
-        </a>
-
-        <a
+        </Link>
+ 
+        <Link
           href="/admin/rooms"
           class="nav-item"
           :class="{ active: currentPage === 'rooms' }"
-          @click.prevent="navigate('rooms')"
         >
           <span class="nav-icon">🛏️</span>
           Room Management
-        </a>
-
-        <a
+        </Link>
+ 
+        <Link
           href="/admin/guests"
           class="nav-item"
           :class="{ active: currentPage === 'guests' }"
-          @click.prevent="navigate('guests')"
         >
           <span class="nav-icon">👥</span>
           Guests
-        </a>
-
+        </Link>
+ 
       </nav>
-
+ 
       <!-- Footer: User + Logout -->
       <div class="sidebar-footer">
         <div class="sidebar-user">
@@ -78,12 +74,12 @@
           <span>🚪</span> Logout
         </button>
       </div>
-
+ 
     </aside>
-
+ 
     <!-- ── Main Area ───────────────────────── -->
     <div class="admin-main">
-
+ 
       <!-- Top Bar -->
       <header class="admin-topbar">
         <div class="topbar-breadcrumb">
@@ -99,14 +95,14 @@
           <button class="topbar-icon-btn" title="Settings">⚙️</button>
         </div>
       </header>
-
+ 
       <!-- Page Content (slot) -->
       <main class="admin-content">
         <slot />
       </main>
-
+ 
     </div>
-
+ 
     <!-- ── Logout Modal ────────────────────── -->
     <Transition name="fade">
       <div v-if="showLogoutModal" class="modal-overlay" @click.self="showLogoutModal = false">
@@ -121,39 +117,46 @@
         </div>
       </div>
     </Transition>
-
+ 
   </div>
 </template>
-
+ 
 <script>
+import { Link } from '@inertiajs/vue3'
 
 export default {
   name: 'AdminLayout',
 
+  components: {Link},
+ 
   props: {
-    // Pass the current page name from each admin page
+    // Pass the current page name from each admin page to highlight the correct nav item
     page: {
       type: String,
       default: 'overview'
     }
   },
-
+ 
   data() {
     return {
-        currentPage: this.page,
-        showLogoutModal: false,
-        pendingCount: 0,
-        user: {
-            name: 'Admin User',
-        }
+      showLogoutModal: false,
+      pendingCount: 0,
+      user: {
+        name: 'Admin User',
+      }
     }
-},
-
+  },
+ 
   computed: {
+    // Derive active nav state from the prop, not internal state
+    currentPage() {
+      return this.page
+    },
+ 
     userInitial() {
       return this.user.name?.charAt(0).toUpperCase() || 'A'
     },
-
+ 
     pageTitle() {
       const titles = {
         overview: 'Overview',
@@ -161,22 +164,18 @@ export default {
         rooms:    'Room Management',
         guests:   'Guest Management',
       }
-      return titles[this.currentPage] || 'Overview'
+      return titles[this.page] || 'Overview'
     }
   },
-
+ 
   methods: {
-    navigate(page) {
-        this.currentPage = page
-    },
-
     logout() {
-        window.location.href = '/login'
+      window.location.href = '/login'
     }
-}
+  }
 }
 </script>
-
+ 
 <style scoped>
 /* ─── Modal ──────────────────────────── */
 .modal-overlay {
@@ -189,7 +188,7 @@ export default {
   justify-content: center;
   z-index: 999;
 }
-
+ 
 .modal-box {
   background: #fff;
   border-radius: 16px;
@@ -198,38 +197,38 @@ export default {
   text-align: center;
   box-shadow: 0 20px 60px rgba(0,0,0,0.2);
 }
-
+ 
 .modal-icon {
   font-size: 36px;
   margin-bottom: 12px;
 }
-
+ 
 .modal-title {
   font-size: 18px;
   font-weight: 700;
   color: #111827;
   margin-bottom: 8px;
 }
-
+ 
 .modal-text {
   font-size: 13.5px;
   color: #6B7280;
   margin-bottom: 24px;
   line-height: 1.5;
 }
-
+ 
 .modal-actions {
   display: flex;
   gap: 10px;
   justify-content: center;
 }
-
+ 
 /* ─── Fade Transition ────────────────── */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;
 }
-
+ 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
