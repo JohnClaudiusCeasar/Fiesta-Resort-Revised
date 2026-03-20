@@ -70,6 +70,7 @@
         <select class="filter-select" v-model="filterStatus">
           <option value="">All Statuses</option>
           <option value="Active">Active</option>
+          <option value="Checked In">Checked In</option>
           <option value="Checked Out">Checked Out</option>
           <option value="Blacklisted">Blacklisted</option>
         </select>
@@ -125,6 +126,7 @@
                 <div class="action-buttons">
                   <button class="action-btn view"      title="View Details"  @click="openModal(guest, 'view')">👁</button>
                   <button class="action-btn edit"      title="Edit Guest"    @click="openModal(guest, 'edit')">✏️</button>
+                  <button class="action-btn delete"    title="Delete Guest"  @click="openModal(guest, 'delete')">🗑</button>
                   <button
                     class="action-btn blacklist"
                     title="Blacklist Guest"
@@ -324,6 +326,20 @@
             </div>
           </template>
 
+          <!-- DELETE MODE -->
+          <template v-else-if="modalMode === 'delete'">
+            <div class="modal-icon">🗑️</div>
+            <h3 class="modal-title">Delete Guest?</h3>
+            <p class="modal-text">
+              This will permanently delete <strong>{{ selectedGuest.name }}</strong> from the system.
+              This action cannot be undone.
+            </p>
+            <div class="modal-actions modal-actions-center">
+              <button class="btn btn-secondary" @click="closeModal">Go Back</button>
+              <button class="btn btn-danger" @click="deleteGuest">Yes, Delete</button>
+            </div>
+          </template>
+
           <!-- BLACKLIST MODE -->
           <template v-else-if="modalMode === 'blacklist'">
             <div class="modal-icon">🚫</div>
@@ -352,6 +368,10 @@ export default {
   name: 'AdminGuests',
   components: { AdminLayout },
 
+  props: {
+    guests: Array
+  },
+
   data() {
     return {
       filterSearch: '',
@@ -364,7 +384,6 @@ export default {
       editForm: {},
       addForm: { name: '', email: '', phone: '', nationality: '', roomId: '' },
 
-      // All rooms — replace with API call later
       availableRooms: [
         { id: 1, number: '101', name: 'Standard Room', type: 'Standard', capacity: 2, price: 2500,  available: true  },
         { id: 2, number: '102', name: 'Standard Room', type: 'Standard', capacity: 2, price: 2500,  available: false },
@@ -375,134 +394,6 @@ export default {
         { id: 7, number: '401', name: 'Family Suite',  type: 'Family',   capacity: 6, price: 11000, available: true  },
         { id: 8, number: '402', name: 'Family Suite',  type: 'Family',   capacity: 6, price: 11000, available: true  },
       ],
-
-      // Placeholder data — replace with API calls later
-      guests: [
-        {
-          id: 1,
-          type: 'online',
-          name: 'Maria Santos',
-          email: 'maria@email.com',
-          phone: '+63 912 345 6789',
-          nationality: 'Filipino',
-          totalBookings: 3,
-          lastStay: '2026-03-20',
-          status: 'Active',
-          createdAt: '2025-08-14',
-          bookings: [
-            { id: '00124', room: 'Deluxe Suite 301',  checkIn: '2026-03-17', checkOut: '2026-03-20', status: 'Confirmed' },
-            { id: '00098', room: 'Standard Room 102', checkIn: '2025-12-24', checkOut: '2025-12-27', status: 'Checked Out' },
-            { id: '00075', room: 'Deluxe Room 205',   checkIn: '2025-08-14', checkOut: '2025-08-17', status: 'Checked Out' },
-          ]
-        },
-        {
-          id: 2,
-          type: 'online',
-          name: 'Juan Dela Cruz',
-          email: 'juan@email.com',
-          phone: '+63 917 654 3210',
-          nationality: 'Filipino',
-          totalBookings: 1,
-          lastStay: '2026-03-18',
-          status: 'Active',
-          createdAt: '2026-03-10',
-          bookings: [
-            { id: '00123', room: 'Standard Room 102', checkIn: '2026-03-17', checkOut: '2026-03-18', status: 'Checked In' },
-          ]
-        },
-        {
-          id: 3,
-          type: 'online',
-          name: 'Ana Reyes',
-          email: 'ana@email.com',
-          phone: '+63 920 111 2233',
-          nationality: 'Filipino',
-          totalBookings: 2,
-          lastStay: '2026-03-19',
-          status: 'Active',
-          createdAt: '2025-11-05',
-          bookings: [
-            { id: '00122', room: 'Family Suite 205',  checkIn: '2026-03-16', checkOut: '2026-03-19', status: 'Checked In' },
-            { id: '00089', room: 'Standard Room 104', checkIn: '2025-11-05', checkOut: '2025-11-08', status: 'Checked Out' },
-          ]
-        },
-        {
-          id: 4,
-          type: 'walkin',
-          name: 'Roberto Valdez',
-          email: '',
-          phone: '+63 908 777 5544',
-          nationality: 'Filipino',
-          totalBookings: 1,
-          lastStay: '2026-03-17',
-          status: 'Checked Out',
-          createdAt: '2026-03-17',
-          bookings: [
-            { id: '00121', room: 'Standard Room 104', checkIn: '2026-03-15', checkOut: '2026-03-17', status: 'Checked Out' },
-          ]
-        },
-        {
-          id: 5,
-          type: 'online',
-          name: 'Liza Fernandez',
-          email: 'liza@email.com',
-          phone: '+63 933 222 4455',
-          nationality: 'Filipino',
-          totalBookings: 1,
-          lastStay: '2026-03-22',
-          status: 'Active',
-          createdAt: '2026-02-28',
-          bookings: [
-            { id: '00120', room: 'Deluxe Room 208', checkIn: '2026-03-18', checkOut: '2026-03-22', status: 'Pending' },
-          ]
-        },
-        {
-          id: 6,
-          type: 'walkin',
-          name: 'Edgar Gomez',
-          email: '',
-          phone: '',
-          nationality: 'Filipino',
-          totalBookings: 2,
-          lastStay: '2026-01-10',
-          status: 'Blacklisted',
-          createdAt: '2025-07-20',
-          bookings: [
-            { id: '00088', room: 'Deluxe Suite 305', checkIn: '2025-12-28', checkOut: '2026-01-01', status: 'Checked Out' },
-            { id: '00055', room: 'Standard Room 101', checkIn: '2025-07-20', checkOut: '2025-07-22', status: 'Cancelled' },
-          ]
-        },
-        {
-          id: 7,
-          type: 'online',
-          name: 'Sofia Ramos',
-          email: 'sofia@email.com',
-          phone: '+63 945 888 0011',
-          nationality: 'Filipino',
-          totalBookings: 1,
-          lastStay: '2026-03-16',
-          status: 'Checked Out',
-          createdAt: '2026-03-10',
-          bookings: [
-            { id: '00118', room: 'Deluxe Suite 305', checkIn: '2026-03-14', checkOut: '2026-03-16', status: 'Cancelled' },
-          ]
-        },
-        {
-          id: 8,
-          type: 'walkin',
-          name: 'Maricel Bautista',
-          email: 'maricel@email.com',
-          phone: '+63 956 123 7890',
-          nationality: 'Filipino',
-          totalBookings: 1,
-          lastStay: '2026-03-19',
-          status: 'Active',
-          createdAt: '2026-03-18',
-          bookings: [
-            { id: '00125', room: 'Family Suite 401', checkIn: '2026-03-18', checkOut: '2026-03-19', status: 'Confirmed' },
-          ]
-        },
-      ]
     }
   },
 
@@ -574,39 +465,41 @@ export default {
 
     saveWalkin(createBooking) {
       if (!this.addForm.name.trim()) return alert('Full name is required.')
-      const newGuest = {
-        id:            this.guests.length + 1,
-        type:          'walkin',
-        name:          this.addForm.name.trim(),
-        email:         this.addForm.email.trim(),
-        phone:         this.addForm.phone.trim(),
-        nationality:   this.addForm.nationality.trim(),
-        totalBookings: 0,
-        lastStay:      null,
-        status:        'Active',
-        createdAt:     new Date().toISOString().slice(0, 10),
-        bookings:      [],
-      }
-      this.guests.push(newGuest)
-      this.closeModal()
-      if (createBooking) {
-        alert(`Guest "${newGuest.name}" registered! Redirect to Create Booking — to be wired up in the next session.`)
-      }
+      this.$inertia.post('/admin/guests', {
+        name:        this.addForm.name.trim(),
+        email:       this.addForm.email.trim(),
+        phone:       this.addForm.phone.trim(),
+        nationality: this.addForm.nationality.trim(),
+      }, {
+        onSuccess: () => this.closeModal()
+      })
     },
 
     saveEdit() {
-      const index = this.guests.findIndex(g => g.id === this.editForm.id)
-      if (index !== -1) this.guests.splice(index, 1, { ...this.editForm })
-      this.closeModal()
+      this.$inertia.put(`/admin/guests/${this.editForm.id}`, {
+        name:        this.editForm.name,
+        email:       this.editForm.email,
+        phone:       this.editForm.phone,
+        nationality: this.editForm.nationality,
+      }, {
+        onSuccess: () => this.closeModal()
+      })
+    },
+
+    deleteGuest() {
+      this.$inertia.delete(`/admin/guests/${this.selectedGuest.id}`, {
+        onSuccess: ()=> this.closeModal()
+      })
     },
 
     blacklistGuest() {
-      const target = this.guests.find(g => g.id === this.selectedGuest.id)
-      if (target) target.status = 'Blacklisted'
-      this.closeModal()
-    }
+      this.$inertia.patch(`/admin/guests/${this.selectedGuest.id}/blacklist`, {}, {
+        onSuccess: () => this.closeModal()
+      })
+    },
   }
 }
+
 </script>
 
 <style scoped>
