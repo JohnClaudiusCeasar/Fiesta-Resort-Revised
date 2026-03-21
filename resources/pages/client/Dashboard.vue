@@ -182,7 +182,7 @@
                   </svg>
                   Guests & Rooms
                 </label>
-                <GuestSelector />
+                <GuestSelector/>
               </div>
  
               <button class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all">

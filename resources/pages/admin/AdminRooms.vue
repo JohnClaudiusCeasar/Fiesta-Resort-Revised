@@ -73,7 +73,7 @@
               <div class="room-name">{{ room.name }}</div>
             </div>
             <div class="room-price">
-              <span class="price-value">₱{{ room.price.toLocaleString() }}</span>
+              <span class="price-value">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
               <span class="price-label">/night</span>
             </div>
           </div>
@@ -135,7 +135,7 @@
               </td>
               <td><span class="room-type-badge">{{ room.type }}</span></td>
               <td>{{ room.capacity }} guests</td>
-              <td><span class="booking-id">₱{{ room.price.toLocaleString() }}</span></td>
+              <td><span class="booking-id">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span></td>
               <td>
                 <span class="badge" :class="room.available ? 'badge-confirmed' : 'badge-cancelled'">
                   {{ room.available ? 'Available' : 'Unavailable' }}
@@ -201,12 +201,12 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Capacity</label>
-                  <input class="form-input" type="number" v-model="roomForm.capacity" min="1" placeholder="e.g. 2" />
+                  <input class="form-input" type="number" v-model.number="roomForm.capacity" min="1" placeholder="e.g. 2" />
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Price per Night (₱)</label>
-                <input class="form-input" type="number" v-model="roomForm.price" min="0" placeholder="e.g. 3500" />
+                <input class="form-input" type="number" v-model.number="roomForm.price_per_night" min="0" placeholder="e.g. 3500" />
               </div>
               <div class="form-group">
                 <label class="form-label">Photo URL</label>
@@ -218,6 +218,17 @@
                   <option :value="true">Available</option>
                   <option :value="false">Unavailable</option>
                 </select>
+              </div>
+              <div class="form-group">
+                <div class="discount-header">
+                  <label class="form-label">Discount (%)</label>
+                  <span class="discount-value">{{ roomForm.discount }}%</span>
+                </div>
+                <input class="form-slider" type="range" v-model.number="roomForm.discount" min="0" max="100" step="1" />
+                <div class="discount-labels">
+                  <span>0%</span>
+                  <span>100%</span>
+                </div>
               </div>
             </div>
             <div class="modal-actions">
@@ -255,6 +266,13 @@ export default {
   name: 'AdminRooms',
   components: { AdminLayout },
 
+  props: {
+    rooms: {
+      type: Array,
+      default: () => []
+    }
+  },
+
   data() {
     return {
       viewMode: 'grid',         // 'grid' | 'table'
@@ -264,53 +282,52 @@ export default {
       showModal: false,
       modalMode: 'add',         // 'add' | 'edit' | 'delete'
       selectedRoom: null,
-      roomForm: this.emptyForm(),
-
-      // Placeholder data — replace with API calls later
-      rooms: [
-        { id: 1, number: '101', name: 'Standard Room',   type: 'Standard', capacity: 2, price: 2500,  available: true,  photo: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80' },
-        { id: 2, number: '102', name: 'Standard Room',   type: 'Standard', capacity: 2, price: 2500,  available: false, photo: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400&q=80' },
-        { id: 3, number: '201', name: 'Deluxe Room',     type: 'Deluxe',   capacity: 2, price: 4200,  available: true,  photo: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&q=80' },
-        { id: 4, number: '205', name: 'Deluxe Room',     type: 'Deluxe',   capacity: 3, price: 4800,  available: true,  photo: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?w=400&q=80' },
-        { id: 5, number: '301', name: 'Deluxe Suite',    type: 'Suite',    capacity: 2, price: 7500,  available: true,  photo: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80' },
-        { id: 6, number: '305', name: 'Deluxe Suite',    type: 'Suite',    capacity: 4, price: 9000,  available: false, photo: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=400&q=80' },
-        { id: 7, number: '401', name: 'Family Suite',    type: 'Family',   capacity: 6, price: 11000, available: true,  photo: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400&q=80' },
-        { id: 8, number: '402', name: 'Family Suite',    type: 'Family',   capacity: 6, price: 11000, available: true,  photo: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400&q=80' },
-      ]
+      roomForm: this.emptyForm()
     }
   },
 
   computed: {
     filteredRooms() {
-      let list = this.rooms
+      let filtered = this.rooms
 
       if (this.filterType) {
-        list = list.filter(r => r.type === this.filterType)
-      }
-      if (this.filterAvailability === 'available') {
-        list = list.filter(r => r.available)
-      } else if (this.filterAvailability === 'unavailable') {
-        list = list.filter(r => !r.available)
+        filtered = filtered.filter(r => r.type === this.filterType)
       }
 
-      return list
+      if (this.filterAvailability === 'available') {
+        filtered = filtered.filter(r => r.available)
+      } else if (this.filterAvailability === 'unavailable') {
+        filtered = filtered.filter(r => !r.available)
+      }
+
+      return filtered
     }
   },
 
   methods: {
     emptyForm() {
-      return { name: '', number: '', type: 'Standard', capacity: 2, price: '', photo: '', available: true }
-    },
-
-    resetFilters() {
-      this.filterType = ''
-      this.filterAvailability = ''
+      return {
+        number: '',
+        name: '',
+        type: 'Standard',
+        capacity: 1,
+        price_per_night: 0,
+        available: true,
+        photo: '',
+        discount: 0
+      }
     },
 
     openModal(room, mode) {
       this.modalMode = mode
-      this.selectedRoom = room ? { ...room } : null
-      this.roomForm = mode === 'edit' ? { ...room } : this.emptyForm()
+      this.selectedRoom = room
+
+      if (mode === 'add') {
+        this.roomForm = this.emptyForm()
+      } else if (mode === 'edit') {
+        this.roomForm = { ...room }
+      }
+
       this.showModal = true
     },
 
@@ -322,49 +339,80 @@ export default {
 
     saveRoom() {
       if (this.modalMode === 'add') {
-        const newRoom = {
-          ...this.roomForm,
-          id: Date.now(),
-          capacity: Number(this.roomForm.capacity),
-          price: Number(this.roomForm.price),
-        }
-        this.rooms.push(newRoom)
+        this.$inertia.post('/rooms', this.roomForm, {
+          onSuccess: () => this.closeModal()
+        })
       } else {
-        const index = this.rooms.findIndex(r => r.id === this.roomForm.id)
-        if (index !== -1) {
-          this.rooms.splice(index, 1, {
-            ...this.roomForm,
-            capacity: Number(this.roomForm.capacity),
-            price: Number(this.roomForm.price),
-          })
-        }
+        this.$inertia.put(`/rooms/${this.selectedRoom.id}`, this.roomForm, {
+          onSuccess: () => this.closeModal()
+        })
       }
-      this.closeModal()
     },
 
     deleteRoom() {
-      this.rooms = this.rooms.filter(r => r.id !== this.selectedRoom.id)
-      this.closeModal()
+      this.$inertia.delete(`/rooms/${this.selectedRoom.id}`, {
+        onSuccess: () => this.closeModal()
+      })
     },
 
     toggleAvailability(room) {
-      const target = this.rooms.find(r => r.id === room.id)
-      if (target) target.available = !target.available
+      this.$inertia.post(`/rooms/${room.id}/toggle-availability`, {}, {
+        onSuccess: () => {
+          room.available = !room.available
+        }
+      })
+    },
+
+    resetFilters() {
+      this.filterType = ''
+      this.filterAvailability = ''
     }
   }
 }
 </script>
 
 <style scoped>
-/* ─── Header ─────────────────────────── */
-.rooms-header {
+/* ─── Page Header ────────────────────── */
+.page-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.rooms-header {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 4px 0;
+}
+
+.page-subtitle {
+  font-size: 13.5px;
+  color: #6B7280;
+  margin: 0;
 }
 
 .add-room-btn {
-  flex-shrink: 0;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: var(--admin-blue, #00B4FF);
+  color: #fff;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.add-room-btn:hover {
+  background: #0099CC;
 }
 
 /* ─── Toolbar ────────────────────────── */
@@ -372,15 +420,15 @@ export default {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
 .filter-bar {
   display: flex;
   align-items: flex-end;
-  gap: 14px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
@@ -391,21 +439,22 @@ export default {
 }
 
 .filter-label {
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--admin-text-muted, #6B7280);
+  color: #6B7280;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .filter-select {
   height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--admin-border, #E5E7EB);
+  padding: 0 12px;
   border-radius: 8px;
-  font-size: 13px;
-  color: var(--admin-text, #111827);
+  border: 1px solid var(--admin-border, #E5E7EB);
   background: #fff;
+  font-size: 13.5px;
+  color: #111827;
+  cursor: pointer;
   outline: none;
   transition: border-color 0.15s;
 }
@@ -435,18 +484,17 @@ export default {
 /* ─── View Toggle ────────────────────── */
 .view-toggle {
   display: flex;
-  gap: 4px;
-  border: 1px solid var(--admin-border, #E5E7EB);
+  gap: 6px;
+  padding: 4px;
+  background: #F3F4F6;
   border-radius: 8px;
-  padding: 3px;
-  background: #fff;
 }
 
 .toggle-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 6px;
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   font-size: 16px;
   cursor: pointer;
@@ -454,100 +502,95 @@ export default {
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
-  color: var(--admin-text-muted, #6B7280);
 }
 
 .toggle-btn.active {
-  background: var(--admin-blue, #00B4FF);
-  color: #fff;
+  background: #fff;
+  border-color: var(--admin-border, #E5E7EB);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-/* ─── Card Grid ──────────────────────── */
+.toggle-btn:hover {
+  background: rgba(0,180,255,0.08);
+}
+
+/* ─── Grid View ──────────────────────── */
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
 }
 
 .room-card {
   background: #fff;
-  border-radius: 14px;
-  border: 1px solid var(--admin-border, #E5E7EB);
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s;
 }
 
 .room-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
 .room-card.unavailable {
-  opacity: 0.72;
+  opacity: 0.7;
 }
 
-/* ─── Room Photo ─────────────────────── */
 .room-photo {
   position: relative;
+  width: 100%;
   height: 160px;
   overflow: hidden;
+  background: #F3F4F6;
 }
 
 .room-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.room-card:hover .room-photo img {
-  transform: scale(1.04);
 }
 
 .room-photo-overlay {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+  display: flex;
+  align-items: flex-start;
+  padding: 10px;
 }
 
 .availability-pill {
+  background: #10B981;
+  color: #fff;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.pill-available {
-  background: #ECFDF5;
-  color: #059669;
-  border: 1px solid #A7F3D0;
+  font-weight: 600;
 }
 
 .pill-unavailable {
-  background: #FEF2F2;
-  color: #DC2626;
-  border: 1px solid #FECACA;
+  background: #EF4444 !important;
 }
 
 /* ─── Room Info ──────────────────────── */
 .room-info {
-  padding: 14px 16px 16px;
+  padding: 16px;
 }
 
 .room-info-top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
 
 .room-number {
   font-size: 11px;
   font-weight: 600;
-  color: var(--admin-blue, #00B4FF);
+  color: var(--admin-text-muted, #6B7280);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 2px;
@@ -790,26 +833,207 @@ export default {
   border-color: var(--admin-blue, #00B4FF);
 }
 
+/* ─── Discount Slider ────────────────── */
+.discount-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.discount-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-blue, #00B4FF);
+}
+
+.form-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #E5E7EB;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 10px 0;
+}
+
+.form-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--admin-blue, #00B4FF);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.form-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 180, 255, 0.4);
+}
+
+.form-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--admin-blue, #00B4FF);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s;
+}
+
+.form-slider::-moz-range-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 180, 255, 0.4);
+}
+
+.discount-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #9CA3AF;
+  margin-top: 4px;
+}
+
 .modal-actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
 }
 
-.btn-danger {
-  background: #DC2626;
-  color: #fff;
-  border: none;
+.btn {
   padding: 8px 18px;
   border-radius: 8px;
+  border: none;
   font-size: 13.5px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--admin-blue, #00B4FF);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #0099CC;
+}
+
+.btn-secondary {
+  background: #F3F4F6;
+  color: #6B7280;
+  border: 1px solid var(--admin-border, #E5E7EB);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #E5E7EB;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: #DC2626;
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #B91C1C;
+}
+
+/* ─── Empty State ────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #6B7280;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.empty-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: #9CA3AF;
+}
+
+/* ─── Table Styles ──────────────────── */
+.admin-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead tr {
+  border-bottom: 1px solid var(--admin-border, #E5E7EB);
+  background: #F9FAFB;
+}
+
+.admin-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid var(--admin-border, #E5E7EB);
   transition: background 0.15s;
 }
 
-.btn-danger:hover {
-  background: #B91C1C;
+.admin-table tbody tr:hover {
+  background: #F9FAFB;
+}
+
+.admin-table td {
+  padding: 12px 16px;
+  font-size: 13.5px;
+  color: #111827;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.badge-confirmed {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.badge-cancelled {
+  background: #FEE2E2;
+  color: #DC2626;
 }
 
 /* ─── Fade Transition ────────────────── */

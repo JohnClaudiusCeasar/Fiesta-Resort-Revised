@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Guest;
+use App\Models\Room;
 use Inertia\Inertia;
 
 class AdminController extends Controller
@@ -19,7 +20,42 @@ class AdminController extends Controller
 
         $component = $pages[$any] ?? 'admin/AdminOverview';
 
-        return Inertia::render($component);
+        // Fetch rooms for all pages
+        $rooms = Room::all()->map(function ($room){
+            return[
+                'id'               => $room->id,
+                'number'           => $room->number,
+                'name'             => $room->name,
+                'type'             => $room->type,
+                'capacity'         => $room->capacity,
+                'price_per_night'  => $room->price_per_night,
+                'available'        => $room->available,
+                'photo'            => $room->photo,
+            ];
+        });
+
+        // Fetch guests
+        $guests = Guest::latest()->get()->map(function ($guest) {
+            return [
+                'id'            => $guest->id,
+                'type'          => $guest->type,
+                'name'          => $guest->name,
+                'email'         => $guest->email,
+                'phone'         => $guest->phone,
+                'nationality'   => $guest->nationality,
+                'status'        => $guest->status_label,
+                'createdAt'     => $guest->created_at->toDateString(),
+                'totalBookings' => 0,
+                'lastStay'      => null,
+                'bookings'      => [],
+            ];
+        });
+
+        return Inertia::render($component, [
+            'rooms' => $rooms,
+            'guests' => $guests,
+            'csrf_token' => csrf_token()
+        ]);
     }
 
     public function guests()
