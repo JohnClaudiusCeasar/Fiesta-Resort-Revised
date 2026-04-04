@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('guests', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
-            $table->enum('type', ['online', 'walkin'])->default('walkin');
+            $table->enum('type', ['online', 'walk-in'])->default('walkin');
             $table->string('name');
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('nationality')->nullable();
-            $table->enum('status', ['active', 'checked_in', 'checked_out', 'blacklisted'])->default('active');
+            $table->enum('status', ['staying', 'checked_in', 'checked_out', 'blacklisted'])->default('active');
             $table->timestamps();
         });
     }

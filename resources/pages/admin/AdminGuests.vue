@@ -244,6 +244,14 @@
                   <label class="form-label">Phone <span class="optional">(optional)</span></label>
                   <input class="form-input" type="text" v-model="addForm.phone" placeholder="+63 9XX XXX XXXX" />
                 </div>
+                <div class="form-group">
+                  <label class="form-label">Check-in Date <span class="required">*</span></label>
+                  <input class="form-input" type="date" v-model="addForm.check_in" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Check-out Date <span class="required">*</span></label>
+                  <input class="form-input" type="date" v-model="addForm.check_out" />
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Nationality <span class="optional">(optional)</span></label>
@@ -255,26 +263,26 @@
                   <option value="">— Select a room —</option>
                   <optgroup label="✅ Available Rooms">
                     <option
-                      v-for="room in availableRooms.filter(r => r.available)"
+                      v-for="room in rooms.filter(r => r.available)"
                       :key="room.id"
                       :value="room.id"
                     >
-                      Room {{ room.number }} · {{ room.name }} · {{ room.type }} · ₱{{ room.price.toLocaleString() }}/night · up to {{ room.capacity }} guests
+                      Room {{ room.number }} · {{ room.name }} · {{ room.type }} · ₱{{ room.price_per_night.toLocaleString() }}/night · up to {{ room.capacity }} guests
                     </option>
                   </optgroup>
                   <optgroup label="🚫 Not Available / Under Renovation">
                     <option
-                      v-for="room in availableRooms.filter(r => !r.available)"
+                      v-for="room in rooms.filter(r => !r.available)"
                       :key="room.id"
                       :value="room.id"
                       disabled
                     >
-                      Room {{ room.number }} · {{ room.name }} · {{ room.type }} · ₱{{ room.price.toLocaleString() }}/night · up to {{ room.capacity }} guests
+                      Room {{ room.number }} · {{ room.name }} · {{ room.type }} · ₱{{ room.price_per_night.toLocaleString() }}/night · up to {{ room.capacity }} guests
                     </option>
                   </optgroup>
                 </select>
-                <div v-if="addForm.roomId" class="room-preview" :class="{ 'room-preview-unavailable': !availableRooms.find(r => r.id === addForm.roomId)?.available }">
-                  <template v-for="room in availableRooms" :key="room.id">
+                <div v-if="selectedRoom" class="room-preview" :class="{ 'room-preview-unavailable': !selectedRoom.find(r => r.id === addForm.roomId)?.available }">
+                  <template v-for="room in rooms" :key="room.id">
                     <div v-if="room.id === addForm.roomId" class="room-preview-inner">
                       <span class="room-preview-number">Room {{ room.number }}</span>
                       <span class="room-preview-name">{{ room.name }}</span>
@@ -369,7 +377,14 @@ export default {
   components: { AdminLayout },
 
   props: {
-    guests: Array
+    guests: {
+      type: Array,
+      default: () => []
+    },
+    rooms: {
+      type: Array,
+      default: () => []
+    }
   },
 
   data() {
@@ -382,24 +397,13 @@ export default {
       modalMode: 'view',   // 'view' | 'add' | 'edit' | 'blacklist'
       selectedGuest: null,
       editForm: {},
-      addForm: { name: '', email: '', phone: '', nationality: '', roomId: '' },
-
-      availableRooms: [
-        { id: 1, number: '101', name: 'Standard Room', type: 'Standard', capacity: 2, price: 2500,  available: true  },
-        { id: 2, number: '102', name: 'Standard Room', type: 'Standard', capacity: 2, price: 2500,  available: false },
-        { id: 3, number: '201', name: 'Deluxe Room',   type: 'Deluxe',   capacity: 2, price: 4200,  available: true  },
-        { id: 4, number: '205', name: 'Deluxe Room',   type: 'Deluxe',   capacity: 3, price: 4800,  available: true  },
-        { id: 5, number: '301', name: 'Deluxe Suite',  type: 'Suite',    capacity: 2, price: 7500,  available: true  },
-        { id: 6, number: '305', name: 'Deluxe Suite',  type: 'Suite',    capacity: 4, price: 9000,  available: false },
-        { id: 7, number: '401', name: 'Family Suite',  type: 'Family',   capacity: 6, price: 11000, available: true  },
-        { id: 8, number: '402', name: 'Family Suite',  type: 'Family',   capacity: 6, price: 11000, available: true  },
-      ],
+      addForm: { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '' },
     }
   },
 
   computed: {
     onlineCount()  { return this.guests.filter(g => g.type === 'online').length },
-    walkinCount()  { return this.guests.filter(g => g.type === 'walkin').length },
+    walkinCount()  { return this.guests.filter(g => g.type === 'walk-in').length },
     stayingCount() { return this.guests.filter(g => g.status === 'Active').length },
 
     filteredGuests() {
@@ -416,6 +420,11 @@ export default {
       if (this.filterStatus) list = list.filter(g => g.status === this.filterStatus)
 
       return list
+    },
+
+    selectedRoom() {
+      if(!this.addForm.roomId) return null;
+      return this.rooms.find(r => r.id === this.addForm.roomId) || null;
     }
   },
 
@@ -470,6 +479,9 @@ export default {
         email:       this.addForm.email.trim(),
         phone:       this.addForm.phone.trim(),
         nationality: this.addForm.nationality.trim(),
+        room_id:     this.addForm.roomId,
+        check_in:    this.addForm.check_in,
+        check_out:   this.addForm.check_out
       }, {
         onSuccess: () => this.closeModal()
       })

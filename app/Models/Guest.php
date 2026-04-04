@@ -24,7 +24,7 @@ class Guest extends Model
 
     public function bookings()
     {
-        //return $this->hasMany(Booking::class);
+        return $this->hasMany(Booking::class);
     }
 
     // Accessors - format status for the frontend
