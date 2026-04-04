@@ -1,33 +1,22 @@
 <template>
   <AdminLayout page="bookings">
  
-    <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">Bookings & Reservations</h1>
       <p class="page-subtitle">Manage and monitor all guest reservations.</p>
     </div>
  
-    <!-- Tab Bar -->
     <div class="bookings-tabs">
-      <button
-        class="bookings-tab"
-        :class="{ active: activeTab === 'all' }"
-        @click="activeTab = 'all'"
-      >
+      <button class="bookings-tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">
         All Bookings
         <span class="tab-count">{{ bookings.length }}</span>
       </button>
-      <button
-        class="bookings-tab"
-        :class="{ active: activeTab === 'pending' }"
-        @click="activeTab = 'pending'"
-      >
+      <button class="bookings-tab" :class="{ active: activeTab === 'pending' }" @click="activeTab = 'pending'">
         Pending
         <span class="tab-count pending">{{ pendingBookings.length }}</span>
       </button>
     </div>
  
-    <!-- Filter Bar -->
     <div class="filter-bar">
       <div class="filter-group">
         <label class="filter-label">Status</label>
@@ -40,21 +29,17 @@
           <option value="Cancelled">Cancelled</option>
         </select>
       </div>
- 
       <div class="filter-group">
         <label class="filter-label">Check-in From</label>
         <input class="filter-input" type="date" v-model="filterDateFrom" />
       </div>
- 
       <div class="filter-group">
         <label class="filter-label">Check-in To</label>
         <input class="filter-input" type="date" v-model="filterDateTo" />
       </div>
- 
       <button class="filter-reset" @click="resetFilters">✕ Reset</button>
     </div>
  
-    <!-- Bookings Table -->
     <div class="admin-card">
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -72,33 +57,31 @@
           </thead>
           <tbody>
             <tr v-for="booking in filteredBookings" :key="booking.id">
-              <td>
-                <span class="booking-id">#{{ booking.id }}</span>
-              </td>
+              <td><span class="booking-id">#{{ booking.display_id }}</span></td>
               <td>
                 <div class="guest-cell">
-                  <div class="guest-avatar">{{ booking.guest.charAt(0) }}</div>
-                  <div>
-                    <div class="guest-name">{{ booking.guest }}</div>
-                    <div class="guest-email">{{ booking.email }}</div>
-                  </div>
+                   <div class="guest-avatar">{{ booking.guest.charAt(0) }}</div>
+                   <div>
+                      <div class="guest-name">{{ booking.guest }}</div>
+                      <div class="guest-email">{{ booking.email }}</div>
+                   </div>
                 </div>
               </td>
               <td>{{ booking.room }}</td>
               <td>{{ booking.checkIn }}</td>
               <td>{{ booking.checkOut }}</td>
-              <td>{{ booking.guestCount }}</td>
+              <td>{{ booking.guestCount }} Guests</td>
               <td>
-                <span class="badge" :class="badgeClass(booking.status)">
+                <span :class="['status-badge', badgeClass(booking.status)]">
                   {{ booking.status }}
                 </span>
               </td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn view" title="View Details" @click="openModal(booking, 'view')">👁</button>
-                  <button class="action-btn confirm" title="Confirm" @click="openModal(booking, 'confirm')" v-if="booking.status === 'Pending'">✔</button>
-                  <button class="action-btn edit" title="Edit" @click="openModal(booking, 'edit')">✏️</button>
-                  <button class="action-btn cancel" title="Cancel" @click="openModal(booking, 'cancel')" v-if="booking.status !== 'Cancelled' && booking.status !== 'Checked Out'">✕</button>
+                  <button class="action-btn view" @click="openModal(booking, 'view')" title="View">👁</button>
+                  <button v-if="booking.status === 'Pending'" class="action-btn confirm" @click="openModal(booking, 'confirm')" title="Confirm">✅</button>
+                  <button class="action-btn edit" @click="openModal(booking, 'edit')" title="Edit">✏️</button>
+                  <button class="action-btn cancel" @click="openModal(booking, 'cancel')" title="Cancel">🚫</button>
                 </div>
               </td>
             </tr>
@@ -108,234 +91,169 @@
         <div v-if="filteredBookings.length === 0" class="empty-state">
           <div class="empty-icon">📋</div>
           <div class="empty-title">No bookings found</div>
-          <div class="empty-text">Try adjusting your filters.</div>
         </div>
       </div>
     </div>
  
-    <!-- ── Booking Modal ──────────────────────────── -->
     <Transition name="fade">
       <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
         <div class="modal-box booking-modal">
  
-          <!-- View Mode -->
           <template v-if="modalMode === 'view'">
             <div class="modal-header">
               <div>
-                <div class="modal-booking-id">#{{ selectedBooking.id }}</div>
+                <div class="modal-booking-id">#{{ selectedBooking.display_id }}</div>
                 <h3 class="modal-title">Booking Details</h3>
               </div>
-              <span class="badge" :class="badgeClass(selectedBooking.status)">{{ selectedBooking.status }}</span>
+              <span class="status-badge" :class="badgeClass(selectedBooking.status)">{{ selectedBooking.status }}</span>
             </div>
             <div class="modal-detail-grid">
-              <div class="detail-item">
-                <span class="detail-label">Guest</span>
-                <span class="detail-value">{{ selectedBooking.guest }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Email</span>
-                <span class="detail-value">{{ selectedBooking.email }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Room</span>
-                <span class="detail-value">{{ selectedBooking.room }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Guests</span>
-                <span class="detail-value">{{ selectedBooking.guestCount }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Check-in</span>
-                <span class="detail-value">{{ selectedBooking.checkIn }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Check-out</span>
-                <span class="detail-value">{{ selectedBooking.checkOut }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">Special Requests</span>
-                <span class="detail-value">{{ selectedBooking.notes || '—' }}</span>
-              </div>
+               <div class="detail-item"><span class="detail-label">Guest</span><span class="detail-value">{{ selectedBooking.guest }}</span></div>
+               <div class="detail-item"><span class="detail-label">Room</span><span class="detail-value">{{ selectedBooking.room }}</span></div>
+               <div class="detail-item"><span class="detail-label">Check-in</span><span class="detail-value">{{ selectedBooking.checkIn }}</span></div>
+               <div class="detail-item"><span class="detail-label">Check-out</span><span class="detail-value">{{ selectedBooking.checkOut }}</span></div>
             </div>
             <div class="modal-actions">
-              <button class="btn btn-secondary" @click="closeModal">Close</button>
+              <button class="btn-secondary" @click="closeModal">Close</button>
             </div>
           </template>
  
-          <!-- Confirm Mode -->
           <template v-else-if="modalMode === 'confirm'">
             <div class="modal-icon">✔️</div>
             <h3 class="modal-title">Confirm Booking?</h3>
-            <p class="modal-text">
-              You are about to confirm booking <strong>#{{ selectedBooking.id }}</strong> for <strong>{{ selectedBooking.guest }}</strong>.
-            </p>
+            <p class="modal-text">Confirm booking #{{ selectedBooking.display_id }} for {{ selectedBooking.guest }}?</p>
             <div class="modal-actions">
-              <button class="btn btn-secondary" @click="closeModal">Cancel</button>
-              <button class="btn btn-primary" @click="confirmBooking">Yes, Confirm</button>
+              <button class="btn-secondary" @click="closeModal">Cancel</button>
+              <button class="btn-primary" @click="confirmBooking">Yes, Confirm</button>
             </div>
           </template>
  
-          <!-- Edit Mode -->
           <template v-else-if="modalMode === 'edit'">
             <div class="modal-header">
-              <div>
-                <div class="modal-booking-id">#{{ selectedBooking.id }}</div>
-                <h3 class="modal-title">Edit Booking</h3>
-              </div>
+               <h3 class="modal-title">Edit Booking #{{ selectedBooking.display_id }}</h3>
             </div>
             <div class="modal-form">
-              <div class="form-group">
-                <label class="form-label">Guest Name</label>
-                <input class="form-input" type="text" v-model="editForm.guest" />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Email</label>
-                <input class="form-input" type="email" v-model="editForm.email" />
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">Check-in</label>
-                  <input class="form-input" type="date" v-model="editForm.checkIn" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">Check-out</label>
-                  <input class="form-input" type="date" v-model="editForm.checkOut" />
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Special Requests</label>
-                <textarea class="form-input form-textarea" v-model="editForm.notes"></textarea>
-              </div>
+               <div class="form-row">
+                  <div class="form-group">
+                     <label class="form-label">Check-in</label>
+                     <input class="form-input" type="date" v-model="editForm.check_in" />
+                  </div>
+                  <div class="form-group">
+                     <label class="form-label">Check-out</label>
+                     <input class="form-input" type="date" v-model="editForm.check_out" />
+                  </div>
+               </div>
+               <div class="form-group">
+                  <label class="form-label">Special Requests</label>
+                  <textarea class="form-input form-textarea" v-model="editForm.notes"></textarea>
+               </div>
             </div>
             <div class="modal-actions">
-              <button class="btn btn-secondary" @click="closeModal">Cancel</button>
-              <button class="btn btn-primary" @click="saveEdit">Save Changes</button>
+              <button class="btn-secondary" @click="closeModal">Cancel</button>
+              <button class="btn-primary" @click="saveEdit">Save Changes</button>
             </div>
           </template>
  
-          <!-- Cancel Mode -->
           <template v-else-if="modalMode === 'cancel'">
             <div class="modal-icon">🚫</div>
             <h3 class="modal-title">Cancel Booking?</h3>
-            <p class="modal-text">
-              This will cancel booking <strong>#{{ selectedBooking.id }}</strong> for <strong>{{ selectedBooking.guest }}</strong>. This action cannot be undone.
-            </p>
+            <p class="modal-text">This will cancel booking #{{ selectedBooking.display_id }}.</p>
             <div class="modal-actions">
-              <button class="btn btn-secondary" @click="closeModal">Go Back</button>
-              <button class="btn btn-danger" @click="cancelBooking">Yes, Cancel It</button>
+              <button class="btn-secondary" @click="closeModal">Go Back</button>
+              <button class="btn-danger" @click="cancelBooking">Yes, Cancel It</button>
             </div>
           </template>
  
         </div>
       </div>
     </Transition>
- 
   </AdminLayout>
 </template>
  
 <script>
 import AdminLayout from '../../components/AdminLayout.vue'
- 
+import { router } from '@inertiajs/vue3' // CRITICAL: Import router for DB changes
+
 export default {
   name: 'AdminBookings',
   components: { AdminLayout },
- 
+  props: {
+    bookings: { type: Array, default: () => [] },
+    rooms: Array,
+    guests: Array
+  },
   data() {
     return {
       activeTab: 'all',
       filterStatus: '',
       filterDateFrom: '',
       filterDateTo: '',
- 
       showModal: false,
-      modalMode: 'view',   // 'view' | 'confirm' | 'edit' | 'cancel'
+      modalMode: '',
       selectedBooking: null,
-      editForm: {},
- 
-      // Placeholder data — replace with API calls later
-      bookings: [
-        { id: '00124', guest: 'Maria Santos',   email: 'maria@email.com',   room: 'Deluxe Suite 301',    checkIn: '2026-03-17', checkOut: '2026-03-20', guestCount: 2, status: 'Confirmed',   notes: 'Late check-in requested.' },
-        { id: '00123', guest: 'Juan Dela Cruz',  email: 'juan@email.com',    room: 'Standard Room 102',   checkIn: '2026-03-17', checkOut: '2026-03-18', guestCount: 1, status: 'Checked In',  notes: '' },
-        { id: '00122', guest: 'Ana Reyes',       email: 'ana@email.com',     room: 'Family Suite 205',    checkIn: '2026-03-16', checkOut: '2026-03-19', guestCount: 4, status: 'Checked In',  notes: 'Extra bed needed.' },
-        { id: '00121', guest: 'Carlo Mendoza',   email: 'carlo@email.com',   room: 'Standard Room 104',   checkIn: '2026-03-15', checkOut: '2026-03-17', guestCount: 2, status: 'Checked Out', notes: '' },
-        { id: '00120', guest: 'Liza Fernandez',  email: 'liza@email.com',    room: 'Deluxe Room 208',     checkIn: '2026-03-18', checkOut: '2026-03-22', guestCount: 2, status: 'Pending',     notes: 'Honeymoon setup please.' },
-        { id: '00119', guest: 'Ramon Cruz',      email: 'ramon@email.com',   room: 'Standard Room 110',   checkIn: '2026-03-19', checkOut: '2026-03-21', guestCount: 1, status: 'Pending',     notes: '' },
-        { id: '00118', guest: 'Sofia Ramos',     email: 'sofia@email.com',   room: 'Deluxe Suite 305',    checkIn: '2026-03-14', checkOut: '2026-03-16', guestCount: 3, status: 'Cancelled',   notes: '' },
-      ]
+      editForm: {
+        id: null,
+        check_in: '', // Use database-style snake_case to match Laravel update
+        check_out: '',
+        notes: ''
+      }
     }
   },
- 
   computed: {
-    pendingBookings() {
-      return this.bookings.filter(b => b.status === 'Pending')
-    },
- 
+    pendingBookings() { return this.bookings.filter(b => b.status === 'Pending') },
     filteredBookings() {
       let list = this.activeTab === 'pending' ? this.pendingBookings : this.bookings
- 
-      if (this.filterStatus) {
-        list = list.filter(b => b.status === this.filterStatus)
-      }
-      if (this.filterDateFrom) {
-        list = list.filter(b => b.checkIn >= this.filterDateFrom)
-      }
-      if (this.filterDateTo) {
-        list = list.filter(b => b.checkIn <= this.filterDateTo)
-      }
- 
+      if (this.filterStatus) list = list.filter(b => b.status === this.filterStatus)
+      if (this.filterDateFrom) list = list.filter(b => b.checkIn >= this.filterDateFrom)
+      if (this.filterDateTo) list = list.filter(b => b.checkIn <= this.filterDateTo)
       return list
     }
   },
- 
   methods: {
     badgeClass(status) {
       const map = {
-        'Confirmed':   'badge-confirmed',
-        'Pending':     'badge-pending',
-        'Cancelled':   'badge-cancelled',
-        'Checked In':  'badge-checked-in',
+        'Confirmed': 'badge-confirmed',
+        'Pending': 'badge-pending',
+        'Cancelled': 'badge-cancelled',
+        'Checked In': 'badge-checked-in',
         'Checked Out': 'badge-checked-out',
       }
       return map[status] || ''
     },
- 
     resetFilters() {
-      this.filterStatus = ''
-      this.filterDateFrom = ''
-      this.filterDateTo = ''
+      this.filterStatus = ''; this.filterDateFrom = ''; this.filterDateTo = ''
     },
- 
     openModal(booking, mode) {
-      this.selectedBooking = { ...booking }
+      this.selectedBooking = booking
       this.modalMode = mode
       if (mode === 'edit') {
-        this.editForm = { ...booking }
+        // Map camelCase prop keys to snake_case form keys for Laravel update
+        this.editForm = {
+          id: booking.id,
+          check_in: booking.checkIn,
+          check_out: booking.checkOut,
+          notes: booking.notes
+        }
       }
       this.showModal = true
     },
- 
-    closeModal() {
-      this.showModal = false
-      this.selectedBooking = null
-      this.editForm = {}
-    },
- 
+    closeModal() { this.showModal = false; this.selectedBooking = null },
+
+    // PERSISTENT DATABASE METHODS
     confirmBooking() {
-      const target = this.bookings.find(b => b.id === this.selectedBooking.id)
-      if (target) target.status = 'Confirmed'
-      this.closeModal()
+      router.patch(`/admin/bookings/${this.selectedBooking.id}/status`, { status: 'Confirmed' }, {
+        onSuccess: () => this.closeModal()
+      })
     },
- 
-    saveEdit() {
-      const index = this.bookings.findIndex(b => b.id === this.editForm.id)
-      if (index !== -1) this.bookings.splice(index, 1, { ...this.editForm })
-      this.closeModal()
-    },
- 
     cancelBooking() {
-      const target = this.bookings.find(b => b.id === this.selectedBooking.id)
-      if (target) target.status = 'Cancelled'
-      this.closeModal()
+      router.patch(`/admin/bookings/${this.selectedBooking.id}/status`, { status: 'Cancelled' }, {
+        onSuccess: () => this.closeModal()
+      })
+    },
+    saveEdit() {
+      router.put(`/admin/bookings/${this.editForm.id}`, this.editForm, {
+        onSuccess: () => this.closeModal()
+      })
     }
   }
 }

@@ -4,6 +4,7 @@ use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\GuestController;
 use App\Http\Controllers\RoomController;
@@ -34,6 +35,18 @@ Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
 // Admin Routes
 // Specific routes
 Route::get('/admin/guests', [AdminController::class, 'guests']);
+
+// Admin - Booking Routes
+Route::prefix('admin/bookings')->group(function() {
+    // 1. Route for updating status (Confirm/Cancel)
+    Route::patch('/{booking}/status', [BookingController::class, 'updateStatus']);
+    
+    // 2. Route for the Edit Modal (Save Changes)
+    Route::put('/{booking}', [BookingController::class, 'update']);
+    
+    // 3. Route for Deleting
+    Route::delete('/{booking}', [BookingController::class, 'destroy']);
+});
 
 // Admin - Guests Routes
 Route::post('/admin/guests'                    , [GuestController::class, 'store'])->name('admin.guests.store');
