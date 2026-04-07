@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class BookingController extends Controller
 {
@@ -50,5 +51,15 @@ class BookingController extends Controller
         $booking->delete();
 
         return back()->with('success', 'Booking deleted successfully.');
+    }
+
+    /**
+     * ...
+     */
+    public function clientBookings() 
+    {
+        return Inertia::render('client/MyBookings', [
+            'bookings' => []
+        ]);
     }
 }

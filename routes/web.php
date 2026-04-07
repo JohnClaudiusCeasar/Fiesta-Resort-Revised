@@ -32,6 +32,11 @@ Route::middleware('auth')->group(function(){
 // Client Dashboard (After Authentication)
 Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
 
+// ...
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-bookings', [BookingController:: class, 'clientBookings'])->name('client.bookings');
+});
+
 // Admin Routes
 // Specific routes
 Route::get('/admin/guests', [AdminController::class, 'guests']);
