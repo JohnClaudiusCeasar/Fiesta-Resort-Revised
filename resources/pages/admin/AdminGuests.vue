@@ -103,7 +103,16 @@
                     {{ guest.name.charAt(0) }}
                   </div>
                   <div>
-                    <div class="guest-name">{{ guest.name }}</div>
+                    <div class="guest-name flex items-center gap-2">
+                      <span>{{ guest.name }}</span>
+                      
+                      <template v-if="guest.is_active">
+                        <span class="relative flex h-3 w-3" title="Active Now">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                        </span>
+                      </template>
+                    </div>
                     <div class="guest-email">{{ guest.email || '—' }}</div>
                   </div>
                 </div>
@@ -370,7 +379,9 @@
 </template>
 
 <script>
-import AdminLayout from '../../components/AdminLayout.vue'
+import { router } from '@inertiajs/vue3';
+import { onMounted, onUnmounted } from 'vue';
+import AdminLayout from '../../components/AdminLayout.vue';
 
 export default {
   name: 'AdminGuests',
@@ -398,6 +409,8 @@ export default {
       selectedGuest: null,
       editForm: {},
       addForm: { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '' },
+
+      pollingInterval: null
     }
   },
 
@@ -509,6 +522,18 @@ export default {
         onSuccess: () => this.closeModal()
       })
     },
+  },
+
+  onMounted() {
+    // Start polling when component is ready
+    this.pollingInterval = setInterval(() => {
+      router.reload({ only: ['guests'], preserveScroll: true });
+    }, 10000);
+  },
+
+  onUnmounted() {
+    // Clean up when leaving the page
+    clearInterval(this.pollingInterval);
   }
 }
 

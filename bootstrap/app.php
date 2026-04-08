@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global 
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
+
+            // Heartbeat function
+            \App\Http\Middleware\UpdateLastSeen::class
         ]);
 
         // Route-Specific

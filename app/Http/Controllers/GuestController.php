@@ -2,13 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Guest;
 use App\Models\Booking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Inertia\Inertia;
 
 class GuestController extends Controller
 {
+
+    public function index()
+    {
+
+        $guests = Guest::all()->map(function ($guest)
+        {
+            // Find the user with the same email
+            $user = User::where('email', $guest->email)->first();
+
+            // Check if they were seen in the last 5 minutes
+            $guest->is_active = $user &&$ $user->last_seen_at && $user->last_seen_at >= now()->subMinutes(5);
+
+            return $guest;
+        });
+
+        return Inertia::render('Admin/Guests', [ 'guest' => $guests]);
+    }
+
     // Store a new walk-in guest (Admin manual Entry)
     public function store(Request $request)
     {
