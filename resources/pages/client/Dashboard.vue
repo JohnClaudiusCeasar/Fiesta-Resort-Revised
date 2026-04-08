@@ -163,6 +163,73 @@
                         <p class="text-gray-400 text-lg max-w-3xl mx-auto">
                             Choose from our selection of comfortable and well-appointed rooms at Fiesta Resort, Brgy. Ipil, Surigao City.
                         </p>
+
+                        <!-- Horizontal Scrollable Rooms Container -->
+                        <div class="py-6 overflow-x-auto scrollbar-hide">
+                            <div class="flex gap-5 pb-4" style="min-width: max-content;">
+                                
+                                <!-- Single Room Card (Repeated for each room) -->
+                                <div 
+                                    v-for="room in rooms" 
+                                    :key="room.id"
+                                    class="flex-shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                                >
+                                    <!-- Room Photo -->
+                                    <div class="relative h-40 bg-gray-200">
+                                        <img 
+                                            :src="room.photo || 'https://via.placeholder.com/400x200?text=No+Image'" 
+                                            :alt="room.name"
+                                            class="w-full h-full object-cover"
+                                        />
+                                        <span class="absolute top-3 right-3 bg-[#00B4FF] text-white text-xs font-bold px-3 py-1 rounded-full">
+                                            {{ room.type }}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Room Info -->
+                                    <div class="p-4">
+                                        <div class="mb-2">
+                                            <p class="text-xs text-gray-400 font-semibold uppercase">Room {{ room.number }}</p>
+                                            <h4 class="text-base font-bold text-gray-800">{{ room.name }}</h4>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 text-gray-500 text-xs mb-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                            <span>Up to {{ room.capacity }} guests</span>
+                                        </div>
+                                        
+                                        <!-- Price -->
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div v-if="room.discount && room.discount > 0">
+                                                <span class="text-xs text-gray-400 line-through">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+                                                <span class="text-lg font-bold text-[#00B4FF] ml-1">₱{{ getDiscountedPrice(room.price_per_night, room.discount).toLocaleString() }}</span>
+                                            </div>
+                                            <div v-else>
+                                                <span class="text-lg font-bold text-[#00B4FF]">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+                                                <span class="text-xs text-gray-400">/night</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Book Button -->
+                                        <button 
+                                            @click="bookRoom(room)"
+                                            class="w-full bg-[#00B4FF] hover:bg-[#009CE0] text-white font-bold py-2.5 rounded-xl transition-colors text-sm"
+                                        >
+                                            Book Now
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+
+                        <!-- Scroll Hint Indicator -->
+                        <div class="flex justify-center gap-2 text-gray-400 text-xs mt-2" v-if="rooms && rooms.length > 3">
+                            <span>← Scroll to see more →</span>
+                        </div>
+
                         <div class="py-12 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
                             <p class="text-gray-400 font-medium italic">No rooms available at the moment.</p>
                         </div>
@@ -439,10 +506,8 @@ import GuestSelector from './GuestSelector.vue';
  
 // define props to recieve data from the backend
 const props = defineProps({
-  user: {
-    type: Object,
-    default: null
-  }
+  user: { type: Object, default: null },
+  rooms: { type: Array, default: () => []}
 });
  
 const scrollToSection = (sectionId) => {
@@ -488,6 +553,16 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('click', closeCalendars);
 });
+
+const getDiscountedPrice = (basePrice, discountPercent) => {
+    const discount = (basePrice * discountPercent) / 100;
+    return Math.round(basePrice - discount);
+};
+
+const bookRoom = (room) => {
+    console.log('Selected room:', room);
+    // TODO: Implement booking logic (scroll to form, open modal, etc.)
+};
  
 // Calendar state and handlers
 const showLogoutModal = ref(false);
