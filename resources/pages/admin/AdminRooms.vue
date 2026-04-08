@@ -668,9 +668,9 @@ export default {
 /* ─── Price with Discount ────────────────── */
 .price-with-discount {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 }
 
 .price-original {
