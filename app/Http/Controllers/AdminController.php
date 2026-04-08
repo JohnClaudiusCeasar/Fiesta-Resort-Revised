@@ -31,6 +31,7 @@ class AdminController extends Controller
                 'price_per_night'  => $room->price_per_night,
                 'available'        => $room->available,
                 'photo'            => $room->photo,
+                'discount'         => $room->discount,
             ];
         });
 

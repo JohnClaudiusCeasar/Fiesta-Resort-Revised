@@ -73,7 +73,13 @@
               <div class="room-name">{{ room.name }}</div>
             </div>
             <div class="room-price">
-              <span class="price-value">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+              <div v-if="room.discount && room.discount > 0" class="price-with-discount">
+                <span class="price-original">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+                <span class="price-value">₱{{ getDiscountedPrice(room.price_per_night, room.discount).toLocaleString() }}</span>
+              </div>
+              <div v-else class="price-value-single">
+                <span class="price-value">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+              </div>
               <span class="price-label">/night</span>
             </div>
           </div>
@@ -135,7 +141,13 @@
               </td>
               <td><span class="room-type-badge">{{ room.type }}</span></td>
               <td>{{ room.capacity }} guests</td>
-              <td><span class="booking-id">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span></td>
+              <td>
+                <div v-if="room.discount && room.discount > 0" class="table-price-discount">
+                  <span class="price-original">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+                  <span class="price-value">₱{{ getDiscountedPrice(room.price_per_night, room.discount).toLocaleString() }}</span>
+                </div>
+                <span v-else class="booking-id">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
+              </td>
               <td>
                 <span class="badge" :class="room.available ? 'badge-confirmed' : 'badge-cancelled'">
                   {{ room.available ? 'Available' : 'Unavailable' }}
@@ -199,19 +211,23 @@
                     <option value="Family">Family</option>
                   </select>
                 </div>
+
                 <div class="form-group">
                   <label class="form-label">Capacity</label>
                   <input class="form-input" type="number" v-model.number="roomForm.capacity" min="1" placeholder="e.g. 2" />
                 </div>
               </div>
+
               <div class="form-group">
                 <label class="form-label">Price per Night (₱)</label>
                 <input class="form-input" type="number" v-model.number="roomForm.price_per_night" min="0" placeholder="e.g. 3500" />
               </div>
+
               <div class="form-group">
                 <label class="form-label">Photo URL</label>
                 <input class="form-input" type="text" v-model="roomForm.photo" placeholder="https://..." />
               </div>
+
               <div class="form-group">
                 <label class="form-label">Availability</label>
                 <select class="form-input" v-model="roomForm.available">
@@ -219,6 +235,29 @@
                   <option :value="false">Unavailable</option>
                 </select>
               </div>
+
+              <div v-if="roomForm.available" style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px;">
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                  <label class="form-label" for="available_from">Available From</label>
+                  <input 
+                    type="date" 
+                    id="available_from"
+                    class="form-input" 
+                    v-model="roomForm.available_from" 
+                  />
+                </div>
+
+                <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                  <label class="form-label" for="available_to">Available To</label>
+                  <input 
+                    type="date" 
+                    id="available_to"
+                    class="form-input" 
+                    v-model="roomForm.available_to" 
+                  />
+                </div>
+              </div>
+
               <div class="form-group">
                 <div class="discount-header">
                   <label class="form-label">Discount (%)</label>
@@ -230,6 +269,7 @@
                   <span>100%</span>
                 </div>
               </div>
+
             </div>
             <div class="modal-actions">
               <button class="btn btn-secondary" @click="closeModal">Cancel</button>
@@ -313,6 +353,8 @@ export default {
         capacity: 1,
         price_per_night: 0,
         available: true,
+        available_from: '',
+        available_to: '',
         photo: '',
         discount: 0
       }
@@ -366,6 +408,11 @@ export default {
     resetFilters() {
       this.filterType = ''
       this.filterAvailability = ''
+    },
+
+    getDiscountedPrice(basePrice, discountPercent) {
+      const discount = (basePrice * discountPercent) / 100
+      return Math.round(basePrice - discount)
     }
   }
 }
@@ -615,6 +662,27 @@ export default {
 .price-label {
   font-size: 11px;
   color: var(--admin-text-muted, #6B7280);
+  display: block;
+}
+
+/* ─── Price with Discount ────────────────── */
+.price-with-discount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.price-original {
+  font-size: 13px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  text-decoration-color: #EF4444;
+}
+
+.price-value-single .price-value {
   display: block;
 }
 
@@ -1015,6 +1083,28 @@ export default {
 .admin-table td {
   padding: 12px 16px;
   font-size: 13.5px;
+  color: #111827;
+}
+
+/* ─── Table Price with Discount ──────────── */
+.table-price-discount {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.table-price-discount .price-original {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9CA3AF;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: #EF4444;
+}
+
+.table-price-discount .price-value {
+  font-size: 14px;
+  font-weight: 800;
   color: #111827;
 }
 

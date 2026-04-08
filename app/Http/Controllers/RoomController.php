@@ -29,25 +29,29 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
+        // Validate ALL incoming rooms Data
         $validated = $request->validate([
             'number'           => 'required|string|unique:rooms|max:50',
             'name'             => 'required|string|max:200',
             'type'             => 'required|in:Standard,Deluxe,Suite,Family',
             'capacity'         => 'required|integer|min:1',
             'price_per_night'  => 'required|numeric|min:0',
+            'photo'            => 'nullable|url|max:500',
             'available'        => 'nullable|boolean',
-            'photo'            => 'nullable|url|max:500'
+            'available_from'   => 'nullable|date|after_or_equal:today',
+            'available_to'     => 'nullable|date|after_or_equal:available_from',
+            'discount'         => 'nullable|numeric|min:0|max:100'
         ]);
 
+        // Creates the room
         $room = Room::create([
             ...$validated,
-            'available' => $request->boolean('available', true)
+            'available' => $request->boolean('available', true),
+            'discount'  => $request->input('discount', 0),
+
         ]);
 
-        return response()->json([
-            'message' => "Room \"{$room->name}\" created successfully.",
-            'room' => $room
-        ], 201);
+        return back()->with('success', "Room \"{$room->name}\" created successfully.");
     }
 
     /**
@@ -71,21 +75,28 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
+        // Validate ALL incoming rooms data
         $validated = $request->validate([
             'number'           => 'required|string|unique:rooms,number,' . $room->id . '|max:50',
             'name'             => 'required|string|max:200',
             'type'             => 'required|in:Standard,Deluxe,Suite,Family',
             'capacity'         => 'required|integer|min:1',
             'price_per_night'  => 'required|numeric|min:0',
+            'photo'            => 'nullable|url|max:500',
             'available'        => 'nullable|boolean',
-            'photo'            => 'nullable|url|max:500'
+            'available_from'   => 'nullable|date|date',
+            'available_to'     => 'nullable|date|after_or_equal:available_from',
+            'discount'         => 'nullable|numeric|min:0|max:100',
         ]);
 
+        // Updates the room
         $room->update([
             ...$validated,
-            'available' => $request->boolean('available', true)
+            'available'        => $request->boolean('available', true),
+            'discount'         => $request->input('discount', 0)
         ]);
 
+        // Return using Inertia back() - this triggers a refresh of the rooms data
         return back()->with('success', "Room \"{$room->name}\" updated successfully.");
     }
 

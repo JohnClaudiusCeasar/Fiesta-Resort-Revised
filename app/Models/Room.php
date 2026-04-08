@@ -13,12 +13,16 @@ class Room extends Model
         'capacity',
         'price_per_night',
         'available',
+        'available_from',
+        'available_to',
         'photo',
         'discount'
     ];
 
     protected $casts = [
-        'available' => 'boolean',
+        'available'       => 'boolean',
+        'available_from'  => 'date',
+        'available_to'    => 'date',
         'price_per_night' => 'decimal:2'
     ];
 
