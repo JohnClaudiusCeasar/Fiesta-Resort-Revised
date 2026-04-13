@@ -165,14 +165,14 @@
                         </p>
 
                         <!-- Horizontal Scrollable Rooms Container -->
-                        <div class="py-6 overflow-x-auto scrollbar-hide">
+                        <div v-if="rooms && rooms.length > 0" class="py-6 overflow-x-auto scrollbar-hide">
                             <div class="flex gap-5 pb-4" style="min-width: max-content;">
                                 
                                 <!-- Single Room Card (Repeated for each room) -->
                                 <div 
                                     v-for="room in rooms" 
                                     :key="room.id"
-                                    class="flex-shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
+                                    class="shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
                                 >
                                     <!-- Room Photo -->
                                     <div class="relative h-40 bg-gray-200">
@@ -230,13 +230,14 @@
                             <span>← Scroll to see more →</span>
                         </div>
 
-                        <div class="py-12 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
+                        <div v-else class="py-12 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
                             <p class="text-gray-400 font-medium italic">No rooms available at the moment.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
+        
         </section>
  
         <!-- About Us Section -->

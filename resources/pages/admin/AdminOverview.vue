@@ -111,7 +111,6 @@ export default {
 
   data() {
     return {
-      // Placeholder stats — replace with API calls later
       stats: {
         todayBookings: 8,
         availableRooms: 12,
@@ -120,7 +119,6 @@ export default {
         totalGuests: 142,
       },
 
-      // Placeholder recent bookings — replace with API call
       recentBookings: [
         { id: '00124', guest: 'Maria Santos',   room: 'Deluxe Suite 301',   checkIn: 'Mar 17', checkOut: 'Mar 20', status: 'Confirmed'   },
         { id: '00123', guest: 'Juan Dela Cruz',  room: 'Standard Room 102', checkIn: 'Mar 17', checkOut: 'Mar 18', status: 'Checked In'  },
@@ -156,3 +154,19 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.btn-primary {
+  background: linear-gradient(135deg, #00B4FF, #009CE0);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 180, 255, 0.3);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #009CE0, #0088C4);
+  box-shadow: 0 4px 16px rgba(0, 180, 255, 0.4);
+  transform: translateY(-1px);
+}
+</style>
