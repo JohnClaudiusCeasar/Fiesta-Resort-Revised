@@ -88,7 +88,7 @@
 </template>
 
 <script setup>
-import { useForm, Link, usePage } from '@inertiajs/vue3';
+import { useForm, Link, usePage, router } from '@inertiajs/vue3';
 import { ref, computed } from 'vue';
 
 const hasError = ref(false);
@@ -113,6 +113,8 @@ const submit = () => {
     },
     onSuccess: () => {
       hasError.value = false;
+      // Redirect to dashboard after successful login using Inertia router
+      router.visit('/');
     }
   });
 };
