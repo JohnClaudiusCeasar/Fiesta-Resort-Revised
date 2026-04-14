@@ -26,11 +26,13 @@
           </select>
         </div>
         <div class="filter-group">
-          <label class="filter-label">Availability</label>
-          <select class="filter-select" v-model="filterAvailability">
+          <label class="filter-label">Status</label>
+          <select class="filter-select" v-model="filterStatus">
             <option value="">All</option>
             <option value="available">Available</option>
             <option value="unavailable">Unavailable</option>
+            <option value="occupied">Occupied</option>
+            <option value="reserved">Reserved</option>
           </select>
         </div>
         <button class="filter-reset" @click="resetFilters">✕ Reset</button>
@@ -53,14 +55,14 @@
         v-for="room in filteredRooms"
         :key="room.id"
         class="room-card"
-        :class="{ unavailable: !room.available }"
+        :class="{ 'room-card-occupied': room.status === 'occupied', 'room-card-reserved': room.status === 'reserved', 'room-card-unavailable': room.status === 'unavailable' }"
       >
         <!-- Room Photo -->
         <div class="room-photo">
           <img :src="room.photo" :alt="room.name" />
           <div class="room-photo-overlay">
-            <span class="availability-pill" :class="room.available ? 'pill-available' : 'pill-unavailable'">
-              {{ room.available ? 'Available' : 'Unavailable' }}
+            <span class="availability-pill" :class="statusPillClass(room.status)">
+              {{ statusLabel(room.status) }}
             </span>
           </div>
         </div>
@@ -91,14 +93,40 @@
 
           <!-- Card Actions -->
           <div class="room-card-actions">
-            <button
-              class="card-action-btn toggle-btn-room"
-              :class="room.available ? 'btn-toggle-off' : 'btn-toggle-on'"
-              @click="toggleAvailability(room)"
-              :title="room.available ? 'Mark Unavailable' : 'Mark Available'"
-            >
-              {{ room.available ? '🔒 Set Unavailable' : '🔓 Set Available' }}
-            </button>
+            <div class="status-toggle-group">
+              <button
+                class="card-action-btn btn-status"
+                :class="{ active: room.status === 'available' }"
+                @click="setStatus(room, 'available')"
+                title="Mark Available"
+              >
+                ✓ Available
+              </button>
+              <button
+                class="card-action-btn btn-status btn-status-occupied"
+                :class="{ active: room.status === 'occupied' }"
+                @click="setStatus(room, 'occupied')"
+                title="Mark Occupied"
+              >
+                🛏️ Occupied
+              </button>
+              <button
+                class="card-action-btn btn-status btn-status-reserved"
+                :class="{ active: room.status === 'reserved' }"
+                @click="setStatus(room, 'reserved')"
+                title="Mark Reserved"
+              >
+                📅 Reserved
+              </button>
+              <button
+                class="card-action-btn btn-status btn-status-unavailable"
+                :class="{ active: room.status === 'unavailable' }"
+                @click="setStatus(room, 'unavailable')"
+                title="Mark Unavailable"
+              >
+                🔒 Unavailable
+              </button>
+            </div>
             <div class="card-action-icons">
               <button class="action-btn edit" title="Edit" @click="openModal(room, 'edit')">✏️</button>
               <button class="action-btn cancel" title="Delete" @click="openModal(room, 'delete')">🗑</button>
@@ -149,21 +177,50 @@
                 <span v-else class="booking-id">₱{{ parseFloat(room.price_per_night).toLocaleString() }}</span>
               </td>
               <td>
-                <span class="badge" :class="room.available ? 'badge-confirmed' : 'badge-cancelled'">
-                  {{ room.available ? 'Available' : 'Unavailable' }}
+                <span class="badge" :class="statusBadgeClass(room.status)">
+                  {{ statusLabel(room.status) }}
                 </span>
               </td>
               <td>
                 <div class="action-buttons">
                   <button
                     class="action-btn"
-                    :title="room.available ? 'Set Unavailable' : 'Set Available'"
-                    @click="toggleAvailability(room)"
+                    :class="{ 'action-btn-active': room.status === 'available' }"
+                    :title="'Set Available'"
+                    @click="setStatus(room, 'available')"
                   >
-                    {{ room.available ? '🔒' : '🔓' }}
+                    ✓
                   </button>
-                  <button class="action-btn edit" title="Edit" @click="openModal(room, 'edit')">✏️</button>
-                  <button class="action-btn cancel" title="Delete" @click="openModal(room, 'delete')">🗑</button>
+                  <button
+                    class="action-btn btn-occupied"
+                    :class="{ 'action-btn-active': room.status === 'occupied' }"
+                    :title="'Set Occupied'"
+                    @click="setStatus(room, 'occupied')"
+                  >
+                    🛏️
+                  </button>
+                  <button
+                    class="action-btn btn-reserved"
+                    :class="{ 'action-btn-active': room.status === 'reserved' }"
+                    :title="'Set Reserved'"
+                    @click="setStatus(room, 'reserved')"
+                  >
+                    📅
+                  </button>
+                  <button
+                    class="action-btn edit"
+                    :title="'Edit'"
+                    @click="openModal(room, 'edit')"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    class="action-btn cancel"
+                    :title="'Delete'"
+                    @click="openModal(room, 'delete')"
+                  >
+                    🗑
+                  </button>
                 </div>
               </td>
             </tr>
@@ -229,14 +286,16 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Availability</label>
-                <select class="form-input" v-model="roomForm.available">
-                  <option :value="true">Available</option>
-                  <option :value="false">Unavailable</option>
+                <label class="form-label">Status</label>
+                <select class="form-input" v-model="roomForm.status">
+                  <option value="available">Available</option>
+                  <option value="unavailable">Unavailable</option>
+                  <option value="occupied">Occupied</option>
+                  <option value="reserved">Reserved</option>
                 </select>
               </div>
 
-              <div v-if="roomForm.available" style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px;">
+              <div v-if="roomForm.status === 'available'" style="display: flex; gap: 16px; margin-top: 16px; margin-bottom: 16px;">
                 <div class="form-group" style="flex: 1; margin-bottom: 0;">
                   <label class="form-label" for="available_from">Available From</label>
                   <input 
@@ -317,7 +376,7 @@ export default {
     return {
       viewMode: 'grid',         // 'grid' | 'table'
       filterType: '',
-      filterAvailability: '',
+      filterStatus: '',
 
       showModal: false,
       modalMode: 'add',         // 'add' | 'edit' | 'delete'
@@ -334,10 +393,8 @@ export default {
         filtered = filtered.filter(r => r.type === this.filterType)
       }
 
-      if (this.filterAvailability === 'available') {
-        filtered = filtered.filter(r => r.available)
-      } else if (this.filterAvailability === 'unavailable') {
-        filtered = filtered.filter(r => !r.available)
+      if (this.filterStatus) {
+        filtered = filtered.filter(r => r.status === this.filterStatus)
       }
 
       return filtered
@@ -352,12 +409,50 @@ export default {
         type: 'Standard',
         capacity: 1,
         price_per_night: 0,
-        available: true,
+        status: 'available',
         available_from: '',
         available_to: '',
         photo: '',
         discount: 0
       }
+    },
+
+    statusLabel(status) {
+      const labels = {
+        'available': 'Available',
+        'unavailable': 'Unavailable',
+        'occupied': 'Occupied',
+        'reserved': 'Reserved'
+      }
+      return labels[status] || status
+    },
+
+    statusPillClass(status) {
+      const classes = {
+        'available': 'pill-available',
+        'unavailable': 'pill-unavailable',
+        'occupied': 'pill-occupied',
+        'reserved': 'pill-reserved'
+      }
+      return classes[status] || 'pill-unavailable'
+    },
+
+    statusBadgeClass(status) {
+      const classes = {
+        'available': 'badge-confirmed',
+        'unavailable': 'badge-cancelled',
+        'occupied': 'badge-checked-in',
+        'reserved': 'badge-pending'
+      }
+      return classes[status] || 'badge-cancelled'
+    },
+
+    setStatus(room, status) {
+      this.$inertia.post(`/rooms/${room.id}/status`, { status }, {
+        onSuccess: () => {
+          room.status = status
+        }
+      })
     },
 
     openModal(room, mode) {
@@ -397,17 +492,9 @@ export default {
       })
     },
 
-    toggleAvailability(room) {
-      this.$inertia.post(`/rooms/${room.id}/toggle-availability`, {}, {
-        onSuccess: () => {
-          room.available = !room.available
-        }
-      })
-    },
-
     resetFilters() {
       this.filterType = ''
-      this.filterAvailability = ''
+      this.filterStatus = ''
     },
 
     getDiscountedPrice(basePrice, discountPercent) {
@@ -582,8 +669,10 @@ export default {
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
 }
 
-.room-card.unavailable {
-  opacity: 0.7;
+.room-card.unavailable,
+.room-card-occupied,
+.room-card-reserved {
+  opacity: 0.85;
 }
 
 .room-photo {
@@ -620,6 +709,14 @@ export default {
 
 .pill-unavailable {
   background: #EF4444 !important;
+}
+
+.pill-occupied {
+  background: #2563EB !important;
+}
+
+.pill-reserved {
+  background: #F59E0B !important;
 }
 
 /* ─── Room Info ──────────────────────── */
@@ -716,35 +813,63 @@ export default {
   gap: 8px;
 }
 
-.card-action-btn {
+.status-toggle-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
   flex: 1;
+}
+
+.card-action-btn {
   height: 32px;
   border-radius: 8px;
   border: 1px solid var(--admin-border, #E5E7EB);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  padding: 0 8px;
+  white-space: nowrap;
 }
 
-.btn-toggle-off {
+.btn-status {
+  background: #F3F4F6;
+  color: #6B7280;
+  border-color: #E5E7EB;
+}
+
+.btn-status:hover {
+  background: #E5E7EB;
+}
+
+.btn-status.active {
+  background: #ECFDF5;
+  border-color: #10B981;
+  color: #059669;
+}
+
+.btn-status-occupied.active {
+  background: #EFF6FF;
+  border-color: #2563EB;
+  color: #2563EB;
+}
+
+.btn-status-reserved.active {
+  background: #FFFBEB;
+  border-color: #F59E0B;
+  color: #D97706;
+}
+
+.btn-status-unavailable {
   background: #FEF2F2;
   border-color: #FECACA;
   color: #DC2626;
 }
 
-.btn-toggle-off:hover {
-  background: #FEE2E2;
-}
-
-.btn-toggle-on {
-  background: #ECFDF5;
-  border-color: #A7F3D0;
-  color: #059669;
-}
-
-.btn-toggle-on:hover {
-  background: #D1FAE5;
+.btn-status-unavailable.active {
+  background: #FEF2F2;
+  border-color: #DC2626;
+  color: #DC2626;
 }
 
 .card-action-icons {
@@ -790,6 +915,9 @@ export default {
 .action-btn:hover       { transform: translateY(-1px); }
 .action-btn.edit:hover  { background: #FFFBEB; border-color: #FDE68A; }
 .action-btn.cancel:hover { background: #FEF2F2; border-color: #FECACA; }
+.action-btn-active { background: #ECFDF5 !important; border-color: #10B981 !important; }
+.btn-occupied.action-btn-active { background: #EFF6FF !important; border-color: #2563EB !important; }
+.btn-reserved.action-btn-active { background: #FFFBEB !important; border-color: #F59E0B !important; }
 
 .booking-id {
   font-family: var(--font-mono, monospace);
@@ -1124,6 +1252,16 @@ export default {
 .badge-cancelled {
   background: #FEE2E2;
   color: #DC2626;
+}
+
+.badge-checked-in {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.badge-pending {
+  background: #FFFBEB;
+  color: #D97706;
 }
 
 /* ─── Fade Transition ────────────────── */

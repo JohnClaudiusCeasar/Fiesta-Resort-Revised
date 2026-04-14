@@ -38,11 +38,11 @@
 
       <div class="stat-card">
         <div class="stat-header">
-          <span class="stat-label">Total Guests</span>
-          <div class="stat-icon">👥</div>
+          <span class="stat-label">Reserved Rooms</span>
+          <div class="stat-icon">📅</div>
         </div>
-        <div class="stat-value">{{ stats.totalGuests }}</div>
-        <div class="stat-change up">↑ 12 this week</div>
+        <div class="stat-value">{{ stats.reservedRooms }}</div>
+        <div class="stat-change">rooms booked for later</div>
       </div>
     </div>
 
@@ -74,7 +74,7 @@
             <tr v-for="booking in recentBookings" :key="booking.id">
               <td>
                 <span style="font-family: var(--font-mono); font-size:12px; color: var(--admin-blue);">
-                  #{{ booking.id }}
+                  #{{ booking.display_id }}
                 </span>
               </td>
               <td>{{ booking.guest }}</td>
@@ -109,29 +109,25 @@ export default {
   name: 'AdminOverview',
   components: { AdminLayout, Link },
 
-  data() {
-    return {
-      stats: {
-        todayBookings: 8,
-        availableRooms: 12,
-        occupiedRooms: 6,
-        totalRooms: 18,
-        totalGuests: 142,
-      },
-
-      recentBookings: [
-        { id: '00124', guest: 'Maria Santos',   room: 'Deluxe Suite 301',   checkIn: 'Mar 17', checkOut: 'Mar 20', status: 'Confirmed'   },
-        { id: '00123', guest: 'Juan Dela Cruz',  room: 'Standard Room 102', checkIn: 'Mar 17', checkOut: 'Mar 18', status: 'Checked In'  },
-        { id: '00122', guest: 'Ana Reyes',       room: 'Family Suite 205',  checkIn: 'Mar 16', checkOut: 'Mar 19', status: 'Checked In'  },
-        { id: '00121', guest: 'Carlo Mendoza',   room: 'Standard Room 104', checkIn: 'Mar 15', checkOut: 'Mar 17', status: 'Checked Out' },
-        { id: '00120', guest: 'Liza Fernandez',  room: 'Deluxe Room 208',   checkIn: 'Mar 18', checkOut: 'Mar 22', status: 'Pending'     },
-      ]
-    }
-  },
-
   computed: {
     firstName() {
       return this.$page?.props?.user?.name?.split(' ')[0] || 'Admin'
+    },
+
+    stats() {
+      const backendStats = this.$page?.props?.stats || {}
+      return {
+        todayBookings: backendStats.todayBookings || 0,
+        availableRooms: backendStats.availableRooms || 0,
+        occupiedRooms: backendStats.occupiedRooms || 0,
+        reservedRooms: backendStats.reservedRooms || 0,
+        totalRooms: backendStats.totalRooms || 0,
+        totalGuests: backendStats.totalGuests || 0,
+      }
+    },
+
+    recentBookings() {
+      return (this.$page?.props?.bookings || []).slice(0, 5)
     },
 
     occupancyRate() {

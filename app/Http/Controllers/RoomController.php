@@ -13,6 +13,7 @@ class RoomController extends Controller
     public function index()
     {
         $rooms = Room::all();
+
         return back()->with('rooms', $rooms);
     }
 
@@ -29,26 +30,23 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate ALL incoming rooms Data
         $validated = $request->validate([
-            'number'           => 'required|string|unique:rooms|max:50',
-            'name'             => 'required|string|max:200',
-            'type'             => 'required|in:Standard,Deluxe,Suite,Family',
-            'capacity'         => 'required|integer|min:1',
-            'price_per_night'  => 'required|numeric|min:0',
-            'photo'            => 'nullable|url|max:500',
-            'available'        => 'nullable|boolean',
-            'available_from'   => 'nullable|date|after_or_equal:today',
-            'available_to'     => 'nullable|date|after_or_equal:available_from',
-            'discount'         => 'nullable|numeric|min:0|max:100'
+            'number' => 'required|string|unique:rooms|max:50',
+            'name' => 'required|string|max:200',
+            'type' => 'required|in:Standard,Deluxe,Suite,Family',
+            'capacity' => 'required|integer|min:1',
+            'price_per_night' => 'required|numeric|min:0',
+            'photo' => 'nullable|url|max:500',
+            'status' => 'nullable|in:available,unavailable,occupied,reserved',
+            'available_from' => 'nullable|date|after_or_equal:today',
+            'available_to' => 'nullable|date|after_or_equal:available_from',
+            'discount' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        // Creates the room
         $room = Room::create([
             ...$validated,
-            'available' => $request->boolean('available', true),
-            'discount'  => $request->input('discount', 0),
-
+            'status' => $request->input('status', 'available'),
+            'discount' => $request->input('discount', 0),
         ]);
 
         return back()->with('success', "Room \"{$room->name}\" created successfully.");
@@ -75,28 +73,25 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
-        // Validate ALL incoming rooms data
         $validated = $request->validate([
-            'number'           => 'required|string|unique:rooms,number,' . $room->id . '|max:50',
-            'name'             => 'required|string|max:200',
-            'type'             => 'required|in:Standard,Deluxe,Suite,Family',
-            'capacity'         => 'required|integer|min:1',
-            'price_per_night'  => 'required|numeric|min:0',
-            'photo'            => 'nullable|url|max:500',
-            'available'        => 'nullable|boolean',
-            'available_from'   => 'nullable|date|date',
-            'available_to'     => 'nullable|date|after_or_equal:available_from',
-            'discount'         => 'nullable|numeric|min:0|max:100',
+            'number' => 'required|string|unique:rooms,number,'.$room->id.'|max:50',
+            'name' => 'required|string|max:200',
+            'type' => 'required|in:Standard,Deluxe,Suite,Family',
+            'capacity' => 'required|integer|min:1',
+            'price_per_night' => 'required|numeric|min:0',
+            'photo' => 'nullable|url|max:500',
+            'status' => 'nullable|in:available,unavailable,occupied,reserved',
+            'available_from' => 'nullable|date|date',
+            'available_to' => 'nullable|date|after_or_equal:available_from',
+            'discount' => 'nullable|numeric|min:0|max:100',
         ]);
 
-        // Updates the room
         $room->update([
             ...$validated,
-            'available'        => $request->boolean('available', true),
-            'discount'         => $request->input('discount', 0)
+            'status' => $request->input('status', 'available'),
+            'discount' => $request->input('discount', 0),
         ]);
 
-        // Return using Inertia back() - this triggers a refresh of the rooms data
         return back()->with('success', "Room \"{$room->name}\" updated successfully.");
     }
 
@@ -106,17 +101,23 @@ class RoomController extends Controller
     public function destroy(Room $room)
     {
         $room->delete();
+
         return back()->with('success', "Room \"{$room->name}\" has been deleted.");
     }
 
     /**
-     * Toggle availability
-     */ 
-    public function toggleAvailability(Room $room)
+     * Set room status
+     */
+    public function setStatus(Request $request, Room $room)
     {
-        $room->update(['available' => !$room->available]);
+        $validated = $request->validate([
+            'status' => 'required|in:available,unavailable,occupied,reserved',
+        ]);
 
-        $status = $room->available ? 'available' : 'unavailable';
-        return back()->with('success', "Room \"{$room->name}\" is now {$status}.");
+        $room->update(['status' => $validated['status']]);
+
+        $statusLabel = ucfirst($validated['status']);
+
+        return back()->with('success', "Room \"{$room->name}\" is now {$statusLabel}.");
     }
 }

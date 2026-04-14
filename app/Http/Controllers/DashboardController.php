@@ -2,31 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
 use App\Models\Room;
-use App\Models\User;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
-    
-    public function show(){
+    public function show()
+    {
 
-        $rooms = Room::where('available', true)->get()->map(function($room) {
+        $rooms = Room::where('status', 'available')->get()->map(function ($room) {
             return [
-                'id'              => $room->id,
-                'number'          => $room->number,
-                'name'            => $room->name,
-                'type'            => $room->type,
-                'capacity'        => $room->capacity,
+                'id' => $room->id,
+                'number' => $room->number,
+                'name' => $room->name,
+                'type' => $room->type,
+                'capacity' => $room->capacity,
                 'price_per_night' => $room->price_per_night,
-                'photo'           => $room->photo,
-                'discount'        => $room->discount ?? 0,
+                'photo' => $room->photo,
+                'discount' => $room->discount ?? 0,
             ];
         });
 
         return Inertia::render('client/Dashboard', [
-            'user'  => auth()->check() ? auth()->user() : null,
-            'rooms' => $rooms
+            'user' => auth()->check() ? auth()->user() : null,
+            'rooms' => $rooms,
         ]);
     }
 }

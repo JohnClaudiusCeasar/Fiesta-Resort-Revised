@@ -12,19 +12,43 @@ class Room extends Model
         'type',
         'capacity',
         'price_per_night',
-        'available',
+        'status',
         'available_from',
         'available_to',
         'photo',
-        'discount'
+        'discount',
     ];
 
     protected $casts = [
-        'available'       => 'boolean',
-        'available_from'  => 'date',
-        'available_to'    => 'date',
-        'price_per_night' => 'decimal:2'
+        'available_from' => 'date',
+        'available_to' => 'date',
+        'price_per_night' => 'decimal:2',
     ];
+
+    // Status constants
+    const STATUS_AVAILABLE = 'available';
+
+    const STATUS_UNAVAILABLE = 'unavailable';
+
+    const STATUS_OCCUPIED = 'occupied';
+
+    const STATUS_RESERVED = 'reserved';
+
+    // Helper methods
+    public function isAvailable()
+    {
+        return $this->status === self::STATUS_AVAILABLE;
+    }
+
+    public function isOccupied()
+    {
+        return $this->status === self::STATUS_OCCUPIED;
+    }
+
+    public function isReserved()
+    {
+        return $this->status === self::STATUS_RESERVED;
+    }
 
     // Relationships
     public function bookings()
