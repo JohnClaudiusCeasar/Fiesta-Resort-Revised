@@ -12,36 +12,44 @@
       </button>
     </div>
 
-    <!-- Stats Row -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon">👥</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ guests.length }}</div>
-          <div class="stat-label">Total Guests</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🖥️</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ onlineCount }}</div>
-          <div class="stat-label">Online Guests</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🚶</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ walkinCount }}</div>
-          <div class="stat-label">Walk-in Guests</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🛎️</div>
-        <div class="stat-info">
-          <div class="stat-value">{{ stayingCount }}</div>
-          <div class="stat-label">Currently Staying</div>
-        </div>
-      </div>
+     <!-- Stats Row -->
+     <div class="stats-row">
+       <div class="stat-card">
+         <div class="stat-icon">
+           <img src="/resources/assets/total_guests_logo.svg" alt="Total Guests" class="stat-logo">
+         </div>
+         <div class="stat-info">
+           <div class="stat-value">{{ guests.length }}</div>
+           <div class="stat-label">Total Guests</div>
+         </div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-icon">
+           <img src="/resources/assets/online_guests_logo.svg" alt="Online Guests" class="stat-logo">
+         </div>
+         <div class="stat-info">
+           <div class="stat-value">{{ onlineCount }}</div>
+           <div class="stat-label">Online Guests</div>
+         </div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-icon">
+           <img src="/resources/assets/walkin_guests_logo.svg" alt="Walk-in Guests" class="stat-logo">
+         </div>
+         <div class="stat-info">
+           <div class="stat-value">{{ walkinCount }}</div>
+           <div class="stat-label">Walk-in Guests</div>
+         </div>
+       </div>
+       <div class="stat-card">
+         <div class="stat-icon">
+           <img src="/resources/assets/currently_staying_logo.svg" alt="Currently Staying" class="stat-logo">
+         </div>
+         <div class="stat-info">
+           <div class="stat-value">{{ stayingCount }}</div>
+           <div class="stat-label">Currently Staying</div>
+         </div>
+       </div>
     </div>
 
     <!-- Filter Bar -->
@@ -595,11 +603,24 @@ export default {
   display: flex;
   align-items: center;
   gap: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .stat-icon {
   font-size: 26px;
   line-height: 1;
+}
+
+.stat-logo {
+  width: 32px;
+  height: 32px;
+  display: block;
 }
 
 .stat-value {
@@ -613,6 +634,10 @@ export default {
   font-size: 12px;
   color: var(--admin-text-muted, #6B7280);
   margin-top: 3px;
+}
+
+.stat-info {
+  text-align: center;
 }
 
 /* ─── Filter Bar ─────────────────────── */
