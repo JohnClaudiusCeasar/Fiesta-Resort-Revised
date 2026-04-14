@@ -22,7 +22,7 @@ class GuestController extends Controller
             $user = User::where('email', $guest->email)->first();
 
             // Check if they were seen in the last 5 minutes
-            $guest->is_active = $user &&$ $user->last_seen_at && $user->last_seen_at >= now()->subMinutes(5);
+            $guest->is_active = $user && $user->last_seen_at && $user->last_seen_at >= now()->subMinutes(5);
 
             return $guest;
         });
