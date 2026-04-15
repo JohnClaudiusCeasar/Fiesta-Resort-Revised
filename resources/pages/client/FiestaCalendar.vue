@@ -3,71 +3,102 @@
     <!-- Calendar Popup Modal -->
     <div v-if="isOpen" class="fiesta-calendar-popup">
       <div class="fiesta-calendar-content">
-        <!-- Header with Month/Year and Navigation -->
-        <div class="calendar-header">
-          <button
-            @click="prevMonth"
-            class="nav-button"
-            aria-label="Previous month"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </button>
+        <!-- Dual Calendar Container -->
+        <div class="dual-calendar-container">
+          <!-- Left Calendar (Current Month) -->
+          <div class="calendar-panel">
+            <!-- Header -->
+            <div class="calendar-header">
+              <h2 class="month-name">{{ monthName }}</h2>
+            </div>
 
-          <h2 class="month-name">
-            {{ monthName }}
-          </h2>
+            <!-- Day Labels -->
+            <div class="day-labels">
+              <div v-for="label in dayLabels" :key="label" class="day-label">{{ label }}</div>
+            </div>
 
-          <button
-            @click="nextMonth"
-            class="nav-button"
-            aria-label="Next month"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5L15.75 12l-7.5 7.5" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Day Labels -->
-        <div class="day-labels">
-          <div v-for="label in dayLabels" :key="label" class="day-label">
-            {{ label }}
+            <!-- Calendar Grid -->
+            <div class="calendar-grid">
+              <button
+                v-for="(day, index) in calendarDays"
+                :key="'left-' + index"
+                @click="selectDate(day, 'current')"
+                :disabled="!day || isPastDate(day, 'current')"
+                :class="[
+                  'calendar-day',
+                  {
+                    'is-selected': isSelected(day),
+                    'is-check-in': isCheckInDay(day, 'current'),
+                    'is-check-out': isCheckOutDay(day, 'current'),
+                    'is-in-range': isInRange(day, 'current'),
+                    'is-empty': !day,
+                    'is-past': isPastDate(day, 'current')
+                  }
+                ]"
+              >
+                <span v-if="day">{{ day }}</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Calendar Grid -->
-        <div class="calendar-grid">
-          <button
-            v-for="(day, index) in calendarDays"
-            :key="index"
-            @click="selectDate(day)"
-            :disabled="!day || isPastDate(day)"
-            :class="[
-              'calendar-day',
-              {
-                'is-selected': isSelected(day),
-                'is-empty': !day,
-                'is-past': isPastDate(day)
-              }
-            ]"
-          >
-            <span v-if="day">{{ day }}</span>
-          </button>
+          <!-- Right Calendar (Next Month) -->
+          <div class="calendar-panel">
+            <!-- Header -->
+            <div class="calendar-header">
+              <h2 class="month-name">{{ nextMonthName }}</h2>
+            </div>
+
+            <!-- Day Labels -->
+            <div class="day-labels">
+              <div v-for="label in dayLabels" :key="label" class="day-label">{{ label }}</div>
+            </div>
+
+            <!-- Calendar Grid -->
+            <div class="calendar-grid">
+              <button
+                v-for="(day, index) in nextMonthDays"
+                :key="'right-' + index"
+                @click="selectDate(day, 'next')"
+                :disabled="!day || isPastDate(day, 'next')"
+                :class="[
+                  'calendar-day',
+                  {
+                    'is-selected': isSelected(day),
+                    'is-check-in': isCheckInDay(day, 'next'),
+                    'is-check-out': isCheckOutDay(day, 'next'),
+                    'is-in-range': isInRange(day, 'next'),
+                    'is-empty': !day,
+                    'is-past': isPastDate(day, 'next')
+                  }
+                ]"
+              >
+                <span v-if="day">{{ day }}</span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Selected Date Display -->
         <div class="selected-date-display">
-          <p class="selected-date-label">Selected Date</p>
-          <p class="selected-date-value">
-            {{ selectedDate.toLocaleDateString('en-US', {
-              weekday: 'short',
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            }) }}
-          </p>
+          <template v-if="mode === 'range'">
+            <p class="selected-date-label">{{ selectingCheckIn ? 'Select Check-in Date' : 'Select Check-out Date' }}</p>
+            <p class="selected-date-value">
+              <span v-if="checkInDate">{{ checkInDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
+              <span v-if="checkOutDate"> - {{ checkOutDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}</span>
+              <span v-if="!checkInDate && !checkOutDate" class="text-gray-400">Click to select dates</span>
+            </p>
+          </template>
+          <template v-else>
+            <p class="selected-date-label">Selected Date</p>
+            <p class="selected-date-value">
+              {{ selectedDate.toLocaleDateString('en-US', {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              }) }}
+            </p>
+          </template>
         </div>
 
         <!-- Action Buttons -->
@@ -85,7 +116,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -95,20 +126,63 @@ const props = defineProps({
   isOpen: {
     type: Boolean,
     default: false
+  },
+  // New props for date range
+  initialCheckIn: {
+    type: String,
+    default: ''
+  },
+  initialCheckOut: {
+    type: String,
+    default: ''
+  },
+  mode: {
+    type: String,
+    default: 'single' // 'single' or 'range'
   }
 });
 
-const emit = defineEmits(['update:modelValue', 'update:isOpen', 'date-selected']);
+const emit = defineEmits(['update:modelValue', 'update:isOpen', 'date-selected', 'update:checkIn', 'update:checkOut']);
 
 // Initialize with today's date
 const today = ref(new Date());
+
+// Date range state
+const checkInDate = ref(null);
+const checkOutDate = ref(null);
+const selectingCheckIn = ref(true); // true = waiting for check-in, false = waiting for check-out
+
+// Parse initial values if provided
+watch(() => props.initialCheckIn, (val) => {
+  if (val) {
+    checkInDate.value = new Date(val);
+  }
+}, { immediate: true });
+
+watch(() => props.initialCheckOut, (val) => {
+  if (val) {
+    checkOutDate.value = new Date(val);
+  }
+}, { immediate: true });
 const currentDate = ref(new Date());
+const nextMonthDate = computed(() => {
+  const date = new Date(currentDate.value);
+  date.setMonth(date.getMonth() + 1);
+  return date;
+});
 const selectedDate = ref(new Date());
 
 const dayLabels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
 const monthName = computed(() => {
   return currentDate.value.toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+});
+
+const nextMonthName = computed(() => {
+  return nextMonthDate.value.toLocaleDateString('en-US', {
     month: 'long',
     year: 'numeric',
   });
@@ -122,12 +196,13 @@ const getFirstDayOfMonth = (date) => {
   return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 };
 
-// Check if a date is in the past
-const isPastDate = (day) => {
+// Check if a date is in the past - supports both calendars
+const isPastDate = (day, monthCal = 'current') => {
   if (!day) return false;
+  const baseDate = monthCal === 'next' ? nextMonthDate.value : currentDate.value;
   const dateToCheck = new Date(
-    currentDate.value.getFullYear(),
-    currentDate.value.getMonth(),
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
     day
   );
   // Set time to midnight for accurate comparison
@@ -145,13 +220,51 @@ const calendarDays = computed(() => {
   return [...emptyDays, ...daysArray];
 });
 
+// Next month calendar days
+const nextMonthDays = computed(() => {
+  const daysInMonth = getDaysInMonth(nextMonthDate.value);
+  const firstDay = getFirstDayOfMonth(nextMonthDate.value);
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  const emptyDays = Array.from({ length: firstDay }, (_, i) => null);
+  return [...emptyDays, ...daysArray];
+});
+
 const isSelected = (day) => {
   if (!day) return false;
-  return (
-    day === selectedDate.value.getDate() &&
-    selectedDate.value.getMonth() === currentDate.value.getMonth() &&
-    selectedDate.value.getFullYear() === currentDate.value.getFullYear()
-  );
+  // Single mode
+  if (props.mode === 'single') {
+    return (
+      day === selectedDate.value.getDate() &&
+      selectedDate.value.getMonth() === currentDate.value.getMonth() &&
+      selectedDate.value.getFullYear() === currentDate.value.getFullYear()
+    );
+  }
+  return false;
+};
+
+// Range mode helpers
+// Check-in day helper - checks both current and next month calendars
+const isCheckInDay = (day, monthCal = 'current') => {
+  if (!day || !checkInDate.value) return false;
+  const baseDate = monthCal === 'next' ? nextMonthDate.value : currentDate.value;
+  const checkDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), day);
+  return checkDate.toDateString() === checkInDate.value.toDateString();
+};
+
+// Check-out day helper - checks both current and next month calendars
+const isCheckOutDay = (day, monthCal = 'current') => {
+  if (!day || !checkOutDate.value) return false;
+  const baseDate = monthCal === 'next' ? nextMonthDate.value : currentDate.value;
+  const checkDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), day);
+  return checkDate.toDateString() === checkOutDate.value.toDateString();
+};
+
+// In-range helper - checks both calendars
+const isInRange = (day, monthCal = 'current') => {
+  if (!day || !checkInDate.value || !checkOutDate.value) return false;
+  const baseDate = monthCal === 'next' ? nextMonthDate.value : currentDate.value;
+  const checkDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), day);
+  return checkDate > checkInDate.value && checkDate < checkOutDate.value;
 };
 
 const prevMonth = () => {
@@ -168,15 +281,41 @@ const nextMonth = () => {
   );
 };
 
-const selectDate = (day) => {
-  if (day && !isPastDate(day)) {
-    selectedDate.value = new Date(
-      currentDate.value.getFullYear(),
-      currentDate.value.getMonth(),
+const selectDate = (day, monthCal = 'current') => {
+  if (day) {
+    const baseDate = monthCal === 'next' ? nextMonthDate.value : currentDate.value;
+    const isPast = isPastDate(day, monthCal);
+    if (isPast) return;
+    
+    const clickedDate = new Date(
+      baseDate.getFullYear(),
+      baseDate.getMonth(),
       day
     );
-    // Update currentDate to match for visual consistency
-    currentDate.value = new Date(selectedDate.value);
+    
+    if (props.mode === 'range') {
+      // Range mode: first click = check-in, second click = check-out
+      if (selectingCheckIn.value) {
+        // First click - set check-in, reset check-out
+        checkInDate.value = clickedDate;
+        checkOutDate.value = null;
+        selectingCheckIn.value = false;
+      } else {
+        // Second click - must be after check-in
+        if (clickedDate > checkInDate.value) {
+          checkOutDate.value = clickedDate;
+          selectingCheckIn.value = true;
+        } else {
+          // If clicked before check-in, treat as new check-in
+          checkInDate.value = clickedDate;
+          checkOutDate.value = null;
+        }
+      }
+    } else {
+      // Single mode - existing behavior
+      selectedDate.value = clickedDate;
+      currentDate.value = new Date(selectedDate.value);
+    }
   }
 };
 
@@ -185,15 +324,46 @@ const cancel = () => {
 };
 
 const confirm = () => {
-  const formattedDate = selectedDate.value.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  if (props.mode === 'range' && checkInDate.value && checkOutDate.value) {
+    // Range mode - emit both check-in and check-out
+    const checkInFormatted = checkInDate.value.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    const checkOutFormatted = checkOutDate.value.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    
+    emit('update:checkIn', checkInFormatted);
+    emit('update:checkOut', checkOutFormatted);
+    emit('update:modelValue', `${checkInFormatted} - ${checkOutFormatted}`);
+    emit('date-selected', { checkIn: checkInFormatted, checkOut: checkOutFormatted });
+  } else if (props.mode === 'range' && checkInDate.value && !checkOutDate.value) {
+    // Only check-in selected in range mode
+    const checkInFormatted = checkInDate.value.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    
+    emit('update:checkIn', checkInFormatted);
+    emit('update:checkOut', '');
+    emit('update:modelValue', checkInFormatted);
+  } else {
+    // Single mode - existing behavior
+    const formattedDate = selectedDate.value.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    
+    emit('update:modelValue', formattedDate);
+    emit('date-selected', formattedDate);
+  }
   
-  // Emit all three events for maximum compatibility
-  emit('update:modelValue', formattedDate);
-  emit('date-selected', formattedDate);
   emit('update:isOpen', false);
 };
 </script>
@@ -218,7 +388,7 @@ const confirm = () => {
   border-radius: 1.5rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
-  max-width: 360px;
+  max-width: 720px;
   overflow: hidden;
 }
 
@@ -236,12 +406,32 @@ const confirm = () => {
 .fiesta-calendar-content {
   background: white;
   border-radius: 1.5rem;
-  padding: 1.5rem;
-  max-width: 360px;
+  padding: 1rem;
+  max-width: 700px;
   width: 100%;
   animation: slideDown 0.3s ease-out;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+}
+
+/* Dual Calendar Container */
+.dual-calendar-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.calendar-panel {
+  flex: 1;
+  min-width: 280px;
+}
+
+.calendar-panel .calendar-header {
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.calendar-panel .day-labels {
+  margin-bottom: 0.25rem;
 }
 
 /* Calendar Header */
@@ -281,38 +471,38 @@ const confirm = () => {
 .day-labels {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .day-label {
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: white;
   padding: 0;
-  height: 3rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #78d7ff, #b8e8fd);
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
 }
 
 /* Calendar Grid */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .calendar-day {
   position: relative;
-  height: 3rem;
-  border-radius: 0.5rem;
+  height: 2.2rem;
+  border-radius: 0.4rem;
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   border: none;
   transition: all 0.2s ease-out;
   cursor: pointer;
@@ -351,6 +541,30 @@ const confirm = () => {
   color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 180, 255, 0.2);
   font-weight: 600;
+}
+
+.calendar-day.is-check-in {
+  background: linear-gradient(135deg, #00B4FF, #0099D8) !important;
+  color: white !important;
+  border-radius: 0.5rem 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.calendar-day.is-check-out {
+  background: linear-gradient(135deg, #00B4FF, #0099D8) !important;
+  color: white !important;
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-weight: 600;
+}
+
+.calendar-day.is-in-range {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+  color: #1d4ed8 !important;
+  border-radius: 0;
+}
+
+.calendar-day.is-check-in.is-check-out {
+  border-radius: 0.5rem;
 }
 
 /* Selected Date Display */

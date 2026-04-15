@@ -87,49 +87,22 @@
         <section id="second-section" class="bg-[#ffffff]">
           <section id="booking" class="py-16 px-8 md:px-16">
             <div class="max-w-7xl mx-auto">
-              <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6">
+              <div class="bg-[#dff7ff] p-8 rounded-2rem shadow-sm flex flex-wrap items-end gap-6 relative booking-bar-container">
                 
-                <div class="flex-1 min-w-200px relative booking-section-checkin">
+<div class="flex-1 min-w-200px relative booking-section-dates">
                   <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
-                    <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                     </svg>
-                    Check In
+                    Check In - Check Out
                   </label>
                   <input 
                     type="text" 
-                    :value="checkInDate" 
-                    @click="checkInCalendarOpen = true"
-                    placeholder="Select date"
+                    :value="dateRangeDisplay" 
+                    @click="dateCalendarOpen = true"
+                    placeholder="Select check-in and check-out dates"
                     readonly
                     class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors" 
-                  />
-                  <FiestaCalendar 
-                    v-model="checkInDate"
-                    :isOpen="checkInCalendarOpen"
-                    @update:isOpen="checkInCalendarOpen = $event"
-                  />
-                </div>
- 
-                <div class="flex-1 min-w-200px relative booking-section-checkout">
-                  <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
-                    <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                    </svg>
-                    Check Out
-                  </label>
-                  <input 
-                    type="text" 
-                    :value="checkOutDate" 
-                    @click="checkOutCalendarOpen = true"
-                    placeholder="Select date"
-                    readonly
-                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors" 
-                  />
-                  <FiestaCalendar 
-                    v-model="checkOutDate"
-                    :isOpen="checkOutCalendarOpen"
-                    @update:isOpen="checkOutCalendarOpen = $event"
                   />
                 </div>
  
@@ -140,12 +113,93 @@
                   </svg>
                   Guests & Rooms
                 </label>
-                <GuestSelector/>
+                <GuestSelector ref="guestSelectorRef"/>
               </div>
- 
-              <button class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all">
+
+              <div class="flex-1 min-w-200px relative booking-section-price">
+                <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
+                  <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879-.659a11.464 11.464 0 015.728 0l.879.659M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                  </svg>
+                  Price Range
+                </label>
+                <button 
+                  @click="priceModalOpen = true"
+                  class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors text-left"
+                >
+                  <span class="text-gray-700 font-medium">{{ priceRangeDisplay }}</span>
+                </button>
+                
+                <!-- Price Range Modal -->
+                <div v-if="priceModalOpen" class="price-modal-dropdown">
+                  <div class="price-modal-content">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Select Price Range</h3>
+                    
+                    <div class="price-input-group mb-4">
+                      <label class="text-sm font-medium text-gray-600 mb-2 block">Min Price (per night)</label>
+                      <div class="flex items-center gap-2">
+                        <span class="text-gray-500">₱</span>
+                        <input 
+                          v-model.number="priceMin" 
+                          type="number" 
+                          min="0"
+                          placeholder="0"
+                          class="flex-1 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#00B4FF]"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div class="price-input-group mb-4">
+                      <label class="text-sm font-medium text-gray-600 mb-2 block">Max Price (per night)</label>
+                      <div class="flex items-center gap-2">
+                        <span class="text-gray-500">₱</span>
+                        <input 
+                          v-model.number="priceMax" 
+                          type="number" 
+                          min="0"
+                          placeholder="No limit"
+                          class="flex-1 border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#00B4FF]"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                      <button 
+                        @click="resetPriceRange"
+                        class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors"
+                      >
+                        Reset
+                      </button>
+                      <button 
+                        @click="priceModalOpen = false"
+                        class="flex-1 px-4 py-2 bg-[#00B4FF] hover:bg-[#009CE0] text-white rounded-lg font-semibold transition-colors"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                @click="handleSearch"
+                class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all"
+              >
                 Search
               </button>
+
+              <!-- Calendar positioned to extend across date and guests sections -->
+              <div v-if="dateCalendarOpen" class="calendar-absolute-wrapper">
+                <FiestaCalendar
+                  mode="range"
+                  :isOpen="dateCalendarOpen"
+                  @update:isOpen="dateCalendarOpen = $event"
+                  @update:checkIn="checkInDate = $event"
+                  @update:checkOut="checkOutDate = $event"
+                  :initialCheckIn="checkInDate"
+                  :initialCheckOut="checkOutDate"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -165,12 +219,12 @@
                         </p>
 
                         <!-- Horizontal Scrollable Rooms Container -->
-                        <div v-if="rooms && rooms.length > 0" class="py-6 overflow-x-auto scrollbar-hide">
+                        <div v-if="displayRooms && displayRooms.length > 0" class="py-6 overflow-x-auto scrollbar-hide">
                             <div class="flex gap-5 pb-4" style="min-width: max-content;">
                                 
                                 <!-- Single Room Card (Repeated for each room) -->
                                 <div 
-                                    v-for="room in rooms" 
+                                    v-for="room in displayRooms" 
                                     :key="room.id"
                                     class="shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100"
                                 >
@@ -225,12 +279,27 @@
                             </div>
                         </div>
 
+                        <!-- Warning Message for No Results -->
+                        <div v-if="hasSearched && displayRooms.length === 0" class="py-12 px-8 border-2 border-dashed border-orange-200 rounded-3xl bg-orange-50">
+                            <div class="text-center">
+                                <div class="text-4xl mb-3">🔍</div>
+                                <p class="text-orange-700 font-semibold text-lg mb-2">No rooms match your criteria</p>
+                                <p class="text-orange-600 text-sm mb-4">Try adjusting your check-in/check-out dates, guest count, or price range.</p>
+                                <button 
+                                    @click="resetFilters"
+                                    class="px-6 py-2 bg-[#00B4FF] hover:bg-[#009CE0] text-white rounded-lg font-medium transition-colors"
+                                >
+                                    Clear Filters
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Scroll Hint Indicator -->
-                        <div class="flex justify-center gap-2 text-gray-400 text-xs mt-2" v-if="rooms && rooms.length > 3">
+                        <div class="flex justify-center gap-2 text-gray-400 text-xs mt-2" v-else-if="displayRooms && displayRooms.length > 3">
                             <span>← Scroll to see more →</span>
                         </div>
 
-                        <div v-else class="py-12 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
+                        <div v-else-if="!hasSearched && (!rooms || rooms.length === 0)" class="py-12 border-2 border-dashed border-gray-200 rounded-3xl bg-white">
                             <p class="text-gray-400 font-medium italic">No rooms available at the moment.</p>
                         </div>
                     </div>
@@ -497,7 +566,7 @@
 </template>
  
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { Link } from '@inertiajs/vue3';
 import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
@@ -513,11 +582,8 @@ const props = defineProps({
  
 const scrollToSection = (sectionId) => {
   const element = document.getElementById(sectionId);
-  const header = document.querySelector('header');
-  if (element && header) {
-    const headerHeight = header.offsetHeight; // Dynamically get header height
-    const offsetTop = element.offsetTop - headerHeight;
-    window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+  if (element) {
+    window.scrollTo({ top: element.offsetTop, behavior: 'smooth' });
   }
 };
  
@@ -536,14 +602,18 @@ const handleSubmit = () => {
 
 // Close both calendars when clicking outside
 const closeCalendars = (e) => {
-  const checkInContainer = document.querySelector('.booking-section-checkin');
-  const checkOutContainer = document.querySelector('.booking-section-checkout');
-  
-  if (checkInContainer && !checkInContainer.contains(e.target)) {
-    checkInCalendarOpen.value = false;
-  }
-  if (checkOutContainer && !checkOutContainer.contains(e.target)) {
-    checkOutCalendarOpen.value = false;
+  try {
+    const calendarWrapper = document.querySelector('.calendar-absolute-wrapper');
+    const inputField = document.querySelector('.booking-section-dates');
+    
+    const isClickOnInput = inputField && inputField.contains(e.target);
+    const isClickOnCalendar = calendarWrapper && calendarWrapper.contains(e.target);
+    
+    if (!isClickOnInput && !isClickOnCalendar) {
+      dateCalendarOpen.value = false;
+    }
+  } catch (err) {
+    // Silently ignore errors from querySelector
   }
 };
 
@@ -569,6 +639,131 @@ const bookRoom = (room) => {
 const showLogoutModal = ref(false);
 const checkInDate = ref('');
 const checkOutDate = ref('');
-const checkInCalendarOpen = ref(false);
-const checkOutCalendarOpen = ref(false);
+const dateCalendarOpen = ref(false);
+
+// Date range display
+const dateRangeDisplay = computed(() => {
+  if (checkInDate.value && checkOutDate.value) {
+    return `${checkInDate.value} - ${checkOutDate.value}`;
+  } else if (checkInDate.value) {
+    return `${checkInDate.value}`;
+  }
+  return '';
+});
+
+// GuestSelector ref
+const guestSelectorRef = ref(null);
+
+// Price range state
+const priceMin = ref(0);
+const priceMax = ref(0);
+const priceModalOpen = ref(false);
+const priceRangeDisplay = computed(() => {
+  if (priceMin.value > 0 || priceMax.value > 0) {
+    const min = priceMin.value > 0 ? `₱${priceMin.value.toLocaleString()}` : 'Min';
+    const max = priceMax.value > 0 ? `₱${priceMax.value.toLocaleString()}` : 'Max';
+    return `${min} - ${max}`;
+  }
+  return 'Select price range';
+});
+
+// Filtered rooms state
+const filteredRooms = ref([]);
+const hasSearched = ref(false);
+
+// Reset price range
+const resetPriceRange = () => {
+  priceMin.value = 0;
+  priceMax.value = 0;
+};
+
+// Reset all filters
+const resetFilters = () => {
+  priceMin.value = 0;
+  priceMax.value = 0;
+  hasSearched.value = false;
+  filteredRooms.value = [];
+};
+
+// Handle search/filter
+const handleSearch = () => {
+  hasSearched.value = true;
+  
+  // Get guest counts from GuestSelector - fix the access pattern
+  let totalGuests = 2;
+  try {
+    const guestSelector = guestSelectorRef.value;
+    if (guestSelector && guestSelector.guests) {
+      // guests is a ref object, access .value to get the actual data
+      const guestsData = guestSelector.guests.value || guestSelector.guests;
+      totalGuests = (guestsData.adults || 0) + (guestsData.children || 0);
+    }
+  } catch (err) {
+    console.log('GuestSelector access error:', err);
+    totalGuests = 2; // default
+  }
+  
+  // Get available rooms - ensure props.rooms exists
+  const allRooms = props.rooms || [];
+  
+  // Filter rooms based on criteria
+  filteredRooms.value = allRooms.filter(room => {
+    // Filter by guest capacity (room must accommodate all guests)
+    const roomCapacity = room.capacity || 0;
+    if (roomCapacity < totalGuests) {
+      return false;
+    }
+    
+    // Filter by price range
+    const roomPrice = parseFloat(room.price_per_night) || 0;
+    if (priceMin.value > 0 && roomPrice < priceMin.value) {
+      return false;
+    }
+    if (priceMax.value > 0 && roomPrice > priceMax.value) {
+      return false;
+    }
+    
+    // Filter by availability - exclude only unavailable status (allow occupied/reserved to show)
+    const roomStatus = room.status || '';
+    if (roomStatus === 'unavailable') {
+      return false;
+    }
+    
+    return true;
+  });
+  
+  console.log('Search triggered - Total Guests:', totalGuests, 'Price Range:', priceMin.value, '-', priceMax.value, 'Rooms found:', filteredRooms.value.length);
+  
+  // Scroll to rooms section
+  const roomsSection = document.getElementById('rooms');
+  if (roomsSection) {
+    roomsSection.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+// Computed display rooms (original or filtered)
+const displayRooms = computed(() => {
+  // If search was performed and we have results, show filtered
+  if (hasSearched.value && filteredRooms.value.length > 0) {
+    return filteredRooms.value;
+  }
+  // Otherwise show all rooms from props
+  return props.rooms || [];
+});
 </script>
+
+<style scoped>
+.booking-bar-container {
+  position: relative;
+}
+
+.calendar-absolute-wrapper {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: 850px;
+  margin-top: 0.5rem;
+}
+</style>
