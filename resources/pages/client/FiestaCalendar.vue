@@ -9,7 +9,14 @@
           <div class="calendar-panel">
             <!-- Header -->
             <div class="calendar-header">
+              <button v-if="canGoPrevious" @click="prevMonth" class="nav-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+              </button>
+              <span v-else class="nav-placeholder"></span>
               <h2 class="month-name">{{ monthName }}</h2>
+              <span class="nav-placeholder"></span>
             </div>
 
             <!-- Day Labels -->
@@ -45,7 +52,13 @@
           <div class="calendar-panel">
             <!-- Header -->
             <div class="calendar-header">
+              <span class="nav-placeholder"></span>
               <h2 class="month-name">{{ nextMonthName }}</h2>
+              <button @click="nextMonth" class="nav-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
+              </button>
             </div>
 
             <!-- Day Labels -->
@@ -375,10 +388,7 @@ const confirm = () => {
 
 /* Calendar Dropdown Popup */
 .fiesta-calendar-popup {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  margin-top: 0.5rem;
+  position: relative;
   background-color: white;
   display: flex;
   align-items: center;
@@ -443,6 +453,9 @@ const confirm = () => {
 }
 
 .nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem;
   border-radius: 0.5rem;
   background-color: transparent;
@@ -450,11 +463,18 @@ const confirm = () => {
   cursor: pointer;
   color: #599bf9;
   transition: all 0.2s ease-out;
+  min-width: 2rem;
+  min-height: 2rem;
 }
 
 .nav-button:hover {
   background-color: #f0f9ff;
   color: #00B4FF;
+}
+
+.nav-placeholder {
+  width: 2rem;
+  height: 2rem;
 }
 
 .month-name {
@@ -465,6 +485,7 @@ const confirm = () => {
   min-width: 10rem;
   text-align: center;
   margin: 0;
+  flex: 1;
 }
 
 /* Day Labels */

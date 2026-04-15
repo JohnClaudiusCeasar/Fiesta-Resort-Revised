@@ -188,7 +188,7 @@
                 Search
               </button>
 
-              <!-- Calendar positioned to extend across date and guests sections -->
+              <!-- Calendar positioned inside filter bar container -->
               <div v-if="dateCalendarOpen" class="calendar-absolute-wrapper">
                 <FiestaCalendar
                   mode="range"
@@ -762,8 +762,9 @@ const displayRooms = computed(() => {
   top: 100%;
   left: 0;
   z-index: 50;
-  width: 100%;
+  margin-left: 24px;
+  width: calc(100% - 3rem);
   max-width: 850px;
-  margin-top: 0.5rem;
+  margin-top: -25px;
 }
 </style>
