@@ -83,11 +83,37 @@
             </div>
           </section>
     
-        <!-- Bookings and Rooms Section -->
+<!-- Bookings and Rooms Section -->
         <section id="second-section" class="bg-[#ffffff]">
           <section id="booking" class="py-16 px-8 md:px-16">
             <div class="max-w-7xl mx-auto">
-              <BookingModal @search="handleSearch" />
+              <div class="bg-[#dff7ff] p-11 rounded-2rem shadow-sm flex flex-wrap justify-between items-center gap-9 relative">
+                <CalendarModal 
+                  ref="calendarModalRef"
+                  class="flex-1"
+                  @update:checkIn="checkInDate = $event"
+                  @update:checkOut="checkOutDate = $event"
+                />
+                <GuestModal 
+                  ref="guestModalRef"
+                  class="flex-1"
+                />
+                <PriceModal 
+                  ref="priceModalRef"
+                  class="flex-1"
+                  :priceMin="priceMin" 
+                  :priceMax="priceMax"
+                  @update:priceMin="priceMin = $event"
+                  @update:priceMax="priceMax = $event"
+                  @reset="resetPriceRange"
+                />
+                <button 
+                  @click="handleSearchWithPrice"
+                  class="bg-[#00B4FF] hover:bg-[#009CE0] text-white px-12 py-3.5 rounded-xl font-bold text-xl transition-all"
+                >
+                  Search
+                </button>
+              </div>
             </div>
           </section>
         </section>
@@ -457,7 +483,9 @@ import { Link } from '@inertiajs/vue3';
 import resortPoolImage from '../assets/FiestaResort1.jpg';
 import getawayImage from '../assets/FiestaResort4.jpg';
 import mangroveImage from '../assets/FiestaResort5.jpg';
-import BookingModal from './BookingModal.vue'; 
+import CalendarModal from './CalendarModal.vue';
+import GuestModal from './GuestModal.vue';
+import PriceModal from './PriceModal.vue'; 
  
 // define props to recieve data from the backend
 const props = defineProps({
@@ -499,19 +527,51 @@ const bookRoom = (room) => {
 const filteredRooms = ref([]);
 const hasSearched = ref(false);
 
+// Component refs
+const calendarModalRef = ref(null);
+const guestModalRef = ref(null);
+const priceModalRef = ref(null);
+
+// Date state
+const checkInDate = ref('');
+const checkOutDate = ref('');
+
 // Reset all filters
 const resetFilters = () => {
   hasSearched.value = false;
   filteredRooms.value = [];
 };
 
-// Handle search/filter
-const handleSearch = (searchData) => {
+// Price range state
+const priceMin = ref(0);
+const priceMax = ref(0);
+
+// Reset price range
+const resetPriceRange = () => {
+  priceMin.value = 0;
+  priceMax.value = 0;
+};
+
+// Handle search - combine all filter data
+const handleSearchWithPrice = () => {
   hasSearched.value = true;
   
-  const totalGuests = searchData?.guests || 2;
-  const priceMinVal = searchData?.priceMin || 0;
-  const priceMaxVal = searchData?.priceMax || 0;
+  // Get guest data from GuestModal
+  let totalGuests = 2;
+  let totalRooms = 1;
+  try {
+    const guestModal = guestModalRef.value;
+    if (guestModal && guestModal.guests) {
+      const guestsData = guestModal.guests.value || guestModal.guests;
+      totalGuests = (guestsData.adults || 0) + (guestsData.children || 0);
+      totalRooms = guestsData.rooms || 1;
+    }
+  } catch (err) {
+    console.log('GuestModal access error:', err);
+  }
+  
+  const priceMinVal = priceMin.value;
+  const priceMaxVal = priceMax.value;
   
   // Get available rooms - ensure props.rooms exists
   const allRooms = props.rooms || [];
@@ -542,7 +602,7 @@ const handleSearch = (searchData) => {
     return true;
   });
   
-  console.log('Search triggered - Total Guests:', totalGuests, 'Price Range:', priceMinVal, '-', priceMaxVal, 'Rooms found:', filteredRooms.value.length);
+  console.log('Search triggered - Check-in:', checkInDate.value, 'Check-out:', checkOutDate.value, 'Total Guests:', totalGuests, 'Rooms:', totalRooms, 'Price Range:', priceMinVal, '-', priceMaxVal, 'Rooms found:', filteredRooms.value.length);
   
   // Scroll to rooms section
   const roomsSection = document.getElementById('rooms');

@@ -1,8 +1,29 @@
 <template>
-  <div class="fiesta-calendar-container">
+  <div class="calendar-modal-wrapper">
+    <!-- Date Input Trigger -->
+    <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+      </svg>
+      Check In - Check Out
+    </label>
+    <div class="relative">
+      <input 
+        type="text" 
+        :value="dateRangeDisplay" 
+        @click="toggleCalendar"
+        placeholder="Select check-in and check-out dates"
+        readonly
+        class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors text-gray-700 font-medium placeholder-gray-400 placeholder:text-sm" 
+      />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+      </svg>
+    </div>
+
     <!-- Calendar Popup Modal -->
-    <div v-if="isOpen" class="fiesta-calendar-popup">
-      <div class="fiesta-calendar-content">
+    <div v-if="isOpen" class="calendar-popup">
+      <div class="calendar-content">
         <!-- Dual Calendar Container -->
         <div class="dual-calendar-container">
           <!-- Left Calendar (Current Month) -->
@@ -156,6 +177,30 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'update:isOpen', 'date-selected', 'update:checkIn', 'update:checkOut']);
+
+// Calendar visibility state (internal)
+const isOpen = ref(false);
+
+// Toggle calendar visibility
+const toggleCalendar = () => {
+  isOpen.value = !isOpen.value;
+};
+
+// Date range display
+const dateRangeDisplay = computed(() => {
+  if (checkInDate.value && checkOutDate.value) {
+    return `${formatDate(checkInDate.value)} - ${formatDate(checkOutDate.value)}`;
+  } else if (checkInDate.value) {
+    return `${formatDate(checkInDate.value)}`;
+  }
+  return '';
+});
+
+// Format date helper
+const formatDate = (date) => {
+  if (!date) return '';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
 
 // Initialize with today's date
 const today = ref(new Date());
@@ -390,18 +435,22 @@ const confirm = () => {
 </script>
 
 <style scoped>
-.fiesta-calendar-container {
+.calendar-modal-wrapper {
   position: relative;
+  width: 100%;
 }
 
 /* Calendar Dropdown Popup */
-.fiesta-calendar-popup {
-  position: relative;
+.calendar-popup {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
   background-color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  z-index: 9999;
   animation: slideDown 0.2s ease-out;
   border-radius: 1.5rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -421,7 +470,7 @@ const confirm = () => {
   }
 }
 
-.fiesta-calendar-content {
+.calendar-content {
   background: white;
   border-radius: 1.5rem;
   padding: 1rem;
