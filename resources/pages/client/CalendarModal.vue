@@ -150,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
   modelValue: {
@@ -180,6 +180,35 @@ const emit = defineEmits(['update:modelValue', 'update:isOpen', 'date-selected',
 
 // Calendar visibility state (internal)
 const isOpen = ref(false);
+
+// Watch for prop changes to sync internal state
+watch(() => props.isOpen, (newVal) => {
+  isOpen.value = newVal;
+});
+
+// Close modal when clicking outside
+const handleClickOutside = (event) => {
+  if (!isOpen.value) return;
+  
+  const wrapper = document.querySelector('.calendar-modal-wrapper');
+  const popup = document.querySelector('.calendar-popup');
+  
+  // Don't close if click is inside wrapper (trigger area) or inside popup
+  if (wrapper && (wrapper.contains(event.target) || (popup && popup.contains(event.target)))) {
+    return;
+  }
+  
+  isOpen.value = false;
+  emit('update:isOpen', false);
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 
 // Toggle calendar visibility
 const toggleCalendar = () => {
@@ -386,6 +415,7 @@ const selectDate = (day, monthCal = 'current') => {
 };
 
 const cancel = () => {
+  isOpen.value = false;
   emit('update:isOpen', false);
 };
 
@@ -431,6 +461,7 @@ const confirm = () => {
   }
   
   emit('update:isOpen', false);
+  isOpen.value = false;
 };
 </script>
 
@@ -454,7 +485,6 @@ const confirm = () => {
   animation: slideDown 0.2s ease-out;
   border-radius: 1.5rem;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 100%;
   max-width: 720px;
   overflow: hidden;
 }

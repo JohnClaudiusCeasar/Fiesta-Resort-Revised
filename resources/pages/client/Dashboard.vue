@@ -91,6 +91,7 @@
                 <CalendarModal 
                   ref="calendarModalRef"
                   class="flex-1"
+                  mode="range"
                   @update:checkIn="checkInDate = $event"
                   @update:checkOut="checkOutDate = $event"
                 />
