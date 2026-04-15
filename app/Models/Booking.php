@@ -13,10 +13,13 @@ class Booking extends Model
     protected $fillable = [
         'guest_id',
         'room_id',
+        'booking_reference',
         'check_in',
         'check_out',
         'guest_count',
+        'total_price',
         'status',
+        'payment_status',
         'notes',
     ];
 
@@ -26,7 +29,7 @@ class Booking extends Model
     {
         return $this->belongsTo(Guest::class);
     }
-    
+
     // A booking belongs to a room
     public function room()
     {

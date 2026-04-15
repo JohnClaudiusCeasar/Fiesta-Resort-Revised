@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Guest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class BookingController extends Controller
@@ -19,7 +20,7 @@ class BookingController extends Controller
         ]);
 
         $booking->update([
-            'status' => $validated['status']
+            'status' => $validated['status'],
         ]);
 
         return back()->with('success', 'Booking status updated successfully.');
@@ -31,11 +32,11 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validated = $request->validate([
-            'check_in'    => 'required|date',
-            'check_out'   => 'required|date|after:check_in',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
             'guest_count' => 'required|integer|min:1',
-            'status'      => 'required|string',
-            'notes'       => 'nullable|string'
+            'status' => 'required|string',
+            'notes' => 'nullable|string',
         ]);
 
         $booking->update($validated);
@@ -56,10 +57,31 @@ class BookingController extends Controller
     /**
      * ...
      */
-    public function clientBookings() 
+    public function clientBookings()
     {
+        $user = Auth::user();
+
+        if (! $user) {
+            return Inertia::render('client/MyBookings', [
+                'bookings' => [],
+            ]);
+        }
+
+        $guest = Guest::where('email', $user->email)->first();
+
+        if (! $guest) {
+            return Inertia::render('client/MyBookings', [
+                'bookings' => [],
+            ]);
+        }
+
+        $bookings = Booking::with('room')
+            ->where('guest_id', $guest->id)
+            ->orderBy('check_in', 'desc')
+            ->get();
+
         return Inertia::render('client/MyBookings', [
-            'bookings' => []
+            'bookings' => $bookings,
         ]);
     }
 }

@@ -83,7 +83,7 @@
             </div>
           </section>
     
-<!-- Bookings and Rooms Section -->
+        <!-- Bookings and Rooms Section -->
         <section id="second-section" class="bg-[#ffffff]">
           <section id="booking" class="py-16 px-8 md:px-16">
             <div class="max-w-7xl mx-auto">
