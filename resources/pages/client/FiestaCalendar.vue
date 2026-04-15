@@ -201,6 +201,14 @@ const nextMonthName = computed(() => {
   });
 });
 
+const canGoPrevious = computed(() => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const viewDate = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth(), 1);
+  const todayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  return viewDate > todayMonth;
+});
+
 const getDaysInMonth = (date) => {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
 };
@@ -420,7 +428,6 @@ const confirm = () => {
   max-width: 700px;
   width: 100%;
   animation: slideDown 0.3s ease-out;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
@@ -432,16 +439,15 @@ const confirm = () => {
 
 .calendar-panel {
   flex: 1;
-  min-width: 280px;
+  min-width: 250px;
 }
 
 .calendar-panel .calendar-header {
   justify-content: center;
-  margin-bottom: 0.5rem;
 }
 
 .calendar-panel .day-labels {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
 }
 
 /* Calendar Header */
@@ -449,6 +455,7 @@ const confirm = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
@@ -493,7 +500,6 @@ const confirm = () => {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 0.25rem;
-  margin-bottom: 0.5rem;
 }
 
 .day-label {
@@ -502,19 +508,20 @@ const confirm = () => {
   font-weight: 600;
   color: white;
   padding: 0;
-  height: 2rem;
+  height: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #78d7ff, #b8e8fd);
   border-radius: 0.4rem;
+  margin-bottom: 1.5rem;
 }
 
 /* Calendar Grid */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
 }
 

@@ -96,14 +96,19 @@
                     </svg>
                     Check In - Check Out
                   </label>
-                  <input 
-                    type="text" 
-                    :value="dateRangeDisplay" 
-                    @click="dateCalendarOpen = true"
-                    placeholder="Select check-in and check-out dates"
-                    readonly
-                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors" 
-                  />
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      :value="dateRangeDisplay" 
+                      @click="dateCalendarOpen = true"
+                      placeholder="Select check-in and check-out dates"
+                      readonly
+                      class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors text-gray-700 font-medium placeholder-gray-400 placeholder:text-sm" 
+                    />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    </svg>
+                  </div>
                 </div>
  
               <div class="flex-1 min-w-200px">
@@ -116,19 +121,24 @@
                 <GuestSelector ref="guestSelectorRef"/>
               </div>
 
-              <div class="flex-1 min-w-200px relative booking-section-price">
-                <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
-                  <svg xmlns="http://www.w3.org/2003/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879-.659a11.464 11.464 0 015.728 0l.879.659M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
-                  </svg>
-                  Price Range
-                </label>
-                <button 
-                  @click="priceModalOpen = true"
-                  class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors text-left"
-                >
-                  <span class="text-gray-700 font-medium">{{ priceRangeDisplay }}</span>
-                </button>
+<div class="flex-1 min-w-200px relative booking-section-price">
+                  <label class="flex items-center gap-2 text-gray-700 font-medium mb-2 pl-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF]">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879-.659a11.464 11.464 0 015.728 0l.879.659M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                    Price Range
+                  </label>
+                  <div class="relative">
+                    <button 
+                      @click="priceModalOpen = true"
+                      class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-3 outline-none cursor-pointer hover:border-[#00B4FF] transition-colors text-left"
+                    >
+                      <span class="text-gray-500 text-sm">{{ priceRangeDisplay }}</span>
+                    </button>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-[#00B4FF] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879-.659a11.464 11.464 0 015.728 0l.879.659M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                    </svg>
+                  </div>
                 
                 <!-- Price Range Modal -->
                 <div v-if="priceModalOpen" class="price-modal-dropdown">
