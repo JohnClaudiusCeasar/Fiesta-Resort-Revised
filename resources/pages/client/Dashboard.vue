@@ -12,7 +12,7 @@
         <nav class="hidden lg:flex items-center gap-10 text-lg font-medium text-gray-600 flex-1 justify-center">
           <a href="#Home" @click.prevent="scrollToSection('first-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Home</a>
           <a href="#Rooms" @click.prevent="scrollToSection('second-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Rooms</a>
-          <Link href="/my-bookings" class="hover:text-[#00B4FF] transition-colors cursor-pointer">My Bookings</Link>
+          <button @click="goToMyBookings" class="hover:text-[#00B4FF] transition-colors cursor-pointer">My Bookings</button>
           <a href="#About" @click.prevent="scrollToSection('third-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">About</a>
           <a href="#contact" @click.prevent="scrollToSection('sixth-section')" class="hover:text-[#00B4FF] transition-colors cursor-pointer">Contact</a>
         </nav>
@@ -563,6 +563,14 @@ const bookRoom = (room) => {
     if (checkOut) params.append('checkOut', checkOut);
     
     window.location.href = `/my-bookings?${params.toString()}`;
+};
+
+const goToMyBookings = () => {
+    if (!props.user) {
+        showLoginRequiredModal.value = true;
+        return;
+    }
+    window.location.href = '/my-bookings';
 };
  
 // Filtered rooms state
