@@ -281,7 +281,7 @@
                   <option value="">— Select a room —</option>
                   <optgroup label="✅ Available Rooms">
                     <option
-                      v-for="room in rooms.filter(r => r.available)"
+                      v-for="room in roomsWithAvailability.filter(r => r.isAvailable)"
                       :key="room.id"
                       :value="room.id"
                     >
@@ -290,7 +290,7 @@
                   </optgroup>
                   <optgroup label="🚫 Not Available / Under Renovation">
                     <option
-                      v-for="room in rooms.filter(r => !r.available)"
+                      v-for="room in roomsWithAvailability.filter(r => !r.isAvailable)"
                       :key="room.id"
                       :value="room.id"
                       disabled
@@ -299,14 +299,14 @@
                     </option>
                   </optgroup>
                 </select>
-                <div v-if="selectedRoom" class="room-preview" :class="{ 'room-preview-unavailable': !selectedRoom.find(r => r.id === addForm.roomId)?.available }">
-                  <template v-for="room in rooms" :key="room.id">
+                <div v-if="selectedRoom" class="room-preview" :class="{ 'room-preview-unavailable': !selectedRoom.isAvailable }">
+                  <template v-for="room in roomsWithAvailability" :key="room.id">
                     <div v-if="room.id === addForm.roomId" class="room-preview-inner">
                       <span class="room-preview-number">Room {{ room.number }}</span>
                       <span class="room-preview-name">{{ room.name }}</span>
-                      <span class="room-type-pill" :class="{ 'room-type-pill-unavailable': !room.available }">{{ room.type }}</span>
-                      <span v-if="!room.available" class="room-unavailable-tag">🚫 Not Available</span>
-                      <span v-else class="room-preview-price">₱{{ room.price.toLocaleString() }}/night</span>
+                      <span class="room-type-pill" :class="{ 'room-type-pill-unavailable': !room.isAvailable }">{{ room.type }}</span>
+                      <span v-if="!room.isAvailable" class="room-unavailable-tag">🚫 Not Available</span>
+                      <span v-else class="room-preview-price">₱{{ room.price_per_night.toLocaleString() }}/night</span>
                       <span class="room-preview-cap">👥 Up to {{ room.capacity }}</span>
                     </div>
                   </template>
@@ -446,11 +446,17 @@ export default {
 
     selectedRoom() {
       if(!this.addForm.roomId) return null;
-      return this.rooms.find(r => r.id === this.addForm.roomId) || null;
+      return this.roomsWithAvailability.find(r => r.id === this.addForm.roomId) || null;
     },
 
     needsBookingDates() {
       return this.addForm.createBooking && this.addForm.roomId;
+    },
+    roomsWithAvailability() {
+      return this.rooms.map(room => ({
+        ...room,
+        isAvailable: room.status === 'available'
+      }));
     }
   },
 
