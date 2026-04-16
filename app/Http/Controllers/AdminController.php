@@ -37,11 +37,12 @@ class AdminController extends Controller
         });
 
         // Fetch guests data for all pages
-        $guests = Guest::withCount('bookings')
+        $guests = Guest::with(['bookings', 'bookings.room'])
             ->latest()
             ->get()
             ->map(function ($guest) {
-                // Get the most recent booking for this guest
+                $this->updateGuestStatus($guest);
+
                 $latestBooking = $guest->bookings()->latest('check_in')->first();
 
                 return [
@@ -55,7 +56,7 @@ class AdminController extends Controller
                     'status' => $guest->status_label ?? $guest->status,
                     'createdAt' => $guest->created_at->toDateString(),
 
-                    'totalBookings' => $guest->bookings_count,
+                    'totalBookings' => $guest->bookings()->count(),
                     'lastStay' => $latestBooking ? $latestBooking->check_in : 'No stays yet',
 
                     'bookings' => $guest->bookings()->latest()->take(5)->get()->map(function ($b) {
@@ -107,6 +108,38 @@ class AdminController extends Controller
             'stats' => $stats,
             'csrf_token' => csrf_token(),
         ]);
+    }
+
+    private function updateGuestStatus($guest)
+    {
+        if (in_array($guest->status, ['checked_out', 'blacklisted'])) {
+            return;
+        }
+
+        $latestBooking = $guest->bookings()
+            ->where('status', 'Confirmed')
+            ->orderBy('check_in', 'desc')
+            ->first();
+
+        if (! $latestBooking) {
+            return;
+        }
+
+        $today = now()->toDateString();
+        $checkIn = $latestBooking->check_in;
+        $checkOut = $latestBooking->check_out;
+
+        $newStatus = $guest->status;
+
+        if ($today >= $checkIn && $today <= $checkOut) {
+            $newStatus = 'checked_in';
+        } elseif ($today > $checkOut) {
+            $newStatus = 'checked_out';
+        }
+
+        if ($newStatus !== $guest->status) {
+            $guest->update(['status' => $newStatus]);
+        }
     }
 
     public function guests()

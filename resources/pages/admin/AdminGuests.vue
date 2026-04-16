@@ -262,12 +262,13 @@
                   <input class="form-input" type="text" v-model="addForm.phone" placeholder="+63 9XX XXX XXXX" />
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Check-in Date <span class="required">*</span></label>
-                  <input class="form-input" type="date" v-model="addForm.check_in" />
+                  <label class="form-label">Check-in Date <span v-if="needsBookingDates" class="required-dates">(Required)</span></label>
+                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_in" />
+                  <span v-if="needsBookingDates" class="date-helper">Dates needed for booking</span>
                 </div>
                 <div class="form-group">
-                  <label class="form-label">Check-out Date <span class="required">*</span></label>
-                  <input class="form-input" type="date" v-model="addForm.check_out" />
+                  <label class="form-label">Check-out Date <span v-if="needsBookingDates" class="required-dates">(Required)</span></label>
+                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_out" />
                 </div>
               </div>
               <div class="form-group">
@@ -314,8 +315,8 @@
             </div>
             <div class="modal-actions">
               <button class="btn btn-secondary" @click="closeModal">Cancel</button>
-              <button class="btn btn-outline" @click="saveWalkin(false)">Save Guest</button>
-              <button class="btn btn-primary" @click="saveWalkin(true)">Save & Create Booking</button>
+              <button class="btn btn-outline" @click="addForm.createBooking = false; saveWalkin(false)">Save Guest</button>
+              <button class="btn btn-primary" @click="addForm.createBooking = true; saveWalkin(true)">Save & Create Booking</button>
             </div>
           </template>
 
@@ -416,7 +417,7 @@ export default {
       modalMode: 'view',   // 'view' | 'add' | 'edit' | 'blacklist'
       selectedGuest: null,
       editForm: {},
-      addForm: { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '' },
+      addForm: { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '', createBooking: false },
 
       pollingInterval: null
     }
@@ -446,6 +447,10 @@ export default {
     selectedRoom() {
       if(!this.addForm.roomId) return null;
       return this.rooms.find(r => r.id === this.addForm.roomId) || null;
+    },
+
+    needsBookingDates() {
+      return this.addForm.createBooking && this.addForm.roomId;
     }
   },
 
@@ -479,7 +484,7 @@ export default {
     openModal(guest, mode) {
       this.modalMode = mode
       if (mode === 'add') {
-        this.addForm = { name: '', email: '', phone: '', nationality: '', roomId: '' }
+        this.addForm = { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '', createBooking: false }
       } else {
         this.selectedGuest = { ...guest }
         if (mode === 'edit') this.editForm = { ...guest }
@@ -495,14 +500,25 @@ export default {
 
     saveWalkin(createBooking) {
       if (!this.addForm.name.trim()) return alert('Full name is required.')
+
+      if (createBooking && this.addForm.roomId) {
+        if (!this.addForm.check_in) return alert('Check-in date is required when creating a booking.')
+        if (!this.addForm.check_out) return alert('Check-out date is required when creating a booking.')
+      }
+
+      if (createBooking && !this.addForm.roomId) {
+        return alert('Please select a room before creating a booking.')
+      }
+
       this.$inertia.post('/admin/guests', {
-        name:        this.addForm.name.trim(),
-        email:       this.addForm.email.trim(),
-        phone:       this.addForm.phone.trim(),
-        nationality: this.addForm.nationality.trim(),
-        room_id:     this.addForm.roomId,
-        check_in:    this.addForm.check_in,
-        check_out:   this.addForm.check_out
+        name:           this.addForm.name.trim(),
+        email:          this.addForm.email.trim() || null,
+        phone:          this.addForm.phone.trim() || null,
+        nationality:    this.addForm.nationality.trim() || null,
+        room_id:        this.addForm.roomId || null,
+        check_in:       this.addForm.check_in || null,
+        check_out:      this.addForm.check_out || null,
+        create_booking: createBooking
       }, {
         onSuccess: () => this.closeModal()
       })
@@ -1029,6 +1045,32 @@ export default {
 }
 
 .form-input:focus { border-color: var(--admin-blue, #00B4FF); }
+
+.date-required {
+  border-color: #F59E0B !important;
+  background: #FFFBEB;
+}
+
+.date-required:focus {
+  border-color: #D97706 !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.required-dates {
+  color: #D97706;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.date-helper {
+  display: block;
+  font-size: 11px;
+  color: #D97706;
+  margin-top: 4px;
+  font-weight: 500;
+}
 
 /* ─── Modal Actions ──────────────────── */
 .modal-actions {

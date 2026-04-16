@@ -1,76 +1,107 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Guest;
 use App\Models\Booking;
-use Illuminate\Support\Facades\DB;
+use App\Models\Guest;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class GuestController extends Controller
 {
-
     public function index()
     {
-
-        $guests = Guest::all()->map(function ($guest)
-        {
-            // Find the user with the same email
+        $guests = Guest::with('bookings')->get()->map(function ($guest) {
             $user = User::where('email', $guest->email)->first();
 
-            // Check if they were seen in the last 5 minutes
             $guest->is_active = $user && $user->last_seen_at && $user->last_seen_at >= now()->subMinutes(5);
+
+            $this->updateGuestStatus($guest);
 
             return $guest;
         });
 
-        return Inertia::render('Admin/Guests', [ 'guest' => $guests]);
+        return Inertia::render('Admin/Guests', ['guest' => $guests]);
+    }
+
+    private function updateGuestStatus($guest)
+    {
+        if (in_array($guest->status, ['checked_out', 'blacklisted'])) {
+            return;
+        }
+
+        $latestBooking = $guest->bookings()
+            ->where('status', 'Confirmed')
+            ->orderBy('check_in', 'desc')
+            ->first();
+
+        if (! $latestBooking) {
+            return;
+        }
+
+        $today = now()->toDateString();
+        $checkIn = $latestBooking->check_in;
+        $checkOut = $latestBooking->check_out;
+
+        $newStatus = $guest->status;
+
+        if ($today >= $checkIn && $today <= $checkOut) {
+            $newStatus = 'checked_in';
+        } elseif ($today > $checkOut) {
+            $newStatus = 'checked_out';
+        }
+
+        if ($newStatus !== $guest->status) {
+            $guest->update(['status' => $newStatus]);
+        }
     }
 
     // Store a new walk-in guest (Admin manual Entry)
     public function store(Request $request)
     {
-        // Validate Guest + Booking Data
-        $validated = $request->validate
-        ([
-            'name'        => 'required|string|max:200',
-            'email'       => 'nullable|email|max:200',
-            'phone'       => 'nullable|string|max:50',
+        $createBooking = $request->boolean('create_booking');
+
+        $rules = [
+            'name' => 'required|string|max:200',
+            'email' => 'nullable|email|max:200',
+            'phone' => 'nullable|string|max:50',
             'nationality' => 'nullable|string|max:100',
+            'room_id' => 'nullable|exists:rooms,id',
+            'check_in' => 'nullable|date',
+            'check_out' => 'nullable|date|after:check_in',
+            'create_booking' => 'nullable|boolean',
+        ];
 
-            // Booking fields (only required if creating a booking)
-            'room_id'     => 'nullable|exists:rooms,id',
-            'check_in'    => 'required_with:room_id|date',
-            'check_out'   => 'required_with:room_id|date|after:check_in',
-        ]);
-        
-        return DB::transaction(function() use ($validated, $request)
-        {
-            // Create Guest
-            $guest = Guest::create
-            ([
-                'name'        => $validated['name'],
-                'email'       => $validated['email'],
-                'phone'       => $validated['phone'],
-                'nationality' => $validated['nationality'],
-                'type'        => 'walk-in',
-                'status'      => 'active'
-            ]);
+        if ($createBooking) {
+            $rules['room_id'] = 'required|exists:rooms,id';
+            $rules['check_in'] = 'required|date';
+            $rules['check_out'] = 'required|date|after:check_in';
+        }
 
-            // Create Booking
-            if ($request->has('room_id') && $request->room_id)
-            {
-                Booking::create
-                ([
-                    'guest_id'    => $guest->id,
-                    'room_id'     => $validated['room_id'],
-                    'check_in'    => $validated['check_in'],
-                    'check_out'   => $validated['check_out'],
-                    'status'      => 'Confirmed',
-                    'guest_count' => 1
+        $validated = $request->validate($rules);
+
+        return DB::transaction(function () use ($validated, $createBooking) {
+            $guestData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'] ?: null,
+                'phone' => $validated['phone'] ?: null,
+                'nationality' => $validated['nationality'] ?: null,
+                'type' => 'walk-in',
+                'status' => 'staying',
+            ];
+
+            $guest = Guest::create($guestData);
+
+            if ($createBooking && ! empty($validated['room_id'])) {
+                Booking::create([
+                    'guest_id' => $guest->id,
+                    'room_id' => $validated['room_id'],
+                    'check_in' => $validated['check_in'],
+                    'check_out' => $validated['check_out'],
+                    'status' => 'Confirmed',
+                    'guest_count' => 1,
                 ]);
 
                 return back()->with('success', "Guest \"{$guest->name}\" registered and booked successfully.");
@@ -84,24 +115,25 @@ class GuestController extends Controller
     public function update(Request $request, Guest $guest)
     {
         $validated = $request->validate([
-            'name'        => 'required|string|max:200',
-            'email'       => 'nullable|email|max:200',
-            'phone'       => 'nullable|string|max:50',
-            'nationality' => 'nullable|string|max:100'
+            'name' => 'required|string|max:200',
+            'email' => 'nullable|email|max:200',
+            'phone' => 'nullable|string|max:50',
+            'nationality' => 'nullable|string|max:100',
         ]);
 
         $guest->update($validated);
-        
+
         return back()->with('success', 'Guest updated successfully.');
     }
 
     // Delete a Guest item
     public function destroy(Guest $guest)
     {
-        if($guest->bookings()->exists()) {
+        if ($guest->bookings()->exists()) {
             return back()->with('error', 'Cannot delete guest with active or past bookings. Try deactivating them instead.');
         } else {
             $guest->delete();
+
             return back()->with('success', 'Guest deleted successfully.');
         }
     }
