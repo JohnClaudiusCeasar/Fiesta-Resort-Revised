@@ -66,7 +66,7 @@
           </div>
         </div>
 
-        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+        <div class="flex gap-4 overflow-x-auto pb-4 rooms-scroll">
           <div 
             v-for="room in filteredRooms" 
             :key="room.id"
@@ -517,5 +517,23 @@ const confirmCancel = () => {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.rooms-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+
+.rooms-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.rooms-scroll::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.rooms-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
 }
 </style>
