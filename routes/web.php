@@ -68,5 +68,5 @@ Route::middleware('admin')->group(function () {
     // Wildcard
     Route::get('/admin/{any?}', [AdminController::class, 'show'])
         ->where('any', '.*')
-        ->name('admin');
+        ->name('admin'); 
 });

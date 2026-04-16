@@ -18,7 +18,7 @@
         </nav>
  
         <div class="flex-1 flex justify-end">
-          <div v-if="user" class="flex items-center gap-3 px-6 py-2 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer" @click="showLogoutModal = true">
+          <div v-if="user && user.email !== 'Admin@gmail.com'" class="flex items-center gap-3 px-6 py-2 border-2 border-gray-200 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer" @click="showLogoutModal = true">
             <div class="w-8 h-8 bg-[#00B4FF] rounded-full flex items-center justify-center text-white font-bold text-sm">
               {{ user.name.charAt(0).toUpperCase() }}
             </div>
