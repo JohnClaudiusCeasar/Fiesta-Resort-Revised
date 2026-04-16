@@ -35,6 +35,7 @@ Route::get('/', [DashboardController::class, 'show'])->name('dashboard');
 // ...
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-bookings', [BookingController::class, 'clientBookings'])->name('client.bookings');
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 });
 
 // Admin Routes

@@ -44,6 +44,25 @@
             </div>
           </div>
         </div>
+
+        <!-- Login Required Modal -->
+        <div v-if="showLoginRequiredModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl p-8 max-w-sm shadow-2xl">
+            <div class="text-center mb-4">
+              <span class="text-5xl">🔐</span>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Login Required</h2>
+            <p class="text-gray-600 mb-6 text-center">Please login first to book a room.</p>
+            <div class="flex gap-4">
+              <button @click="showLoginRequiredModal = false" class="flex-1 px-4 py-2 border-2 border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              <Link href="/login" class="flex-1 px-4 py-2 bg-[#00B4FF] hover:bg-[#009CE0] text-white rounded-lg font-semibold transition-colors text-center">
+                Login
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 </header>
   
@@ -520,8 +539,30 @@ const getDiscountedPrice = (basePrice, discountPercent) => {
 };
 
 const bookRoom = (room) => {
-    console.log('Selected room:', room);
-    // TODO: Implement booking logic (scroll to form, open modal, etc.)
+    if (!props.user) {
+        showLoginRequiredModal.value = true;
+        return;
+    }
+    
+    const checkIn = checkInDate.value;
+    const checkOut = checkOutDate.value;
+    
+    const params = new URLSearchParams();
+    params.append('selectedRoom', JSON.stringify({
+        id: room.id,
+        name: room.name,
+        number: room.number,
+        type: room.type,
+        capacity: room.capacity,
+        price_per_night: room.price_per_night,
+        photo: room.photo,
+        discount: room.discount
+    }));
+    
+    if (checkIn) params.append('checkIn', checkIn);
+    if (checkOut) params.append('checkOut', checkOut);
+    
+    window.location.href = `/my-bookings?${params.toString()}`;
 };
  
 // Filtered rooms state
@@ -546,6 +587,10 @@ const resetFilters = () => {
 // Price range state
 const priceMin = ref(0);
 const priceMax = ref(0);
+
+// Modal states
+const showLogoutModal = ref(false);
+const showLoginRequiredModal = ref(false);
 
 // Reset price range
 const resetPriceRange = () => {

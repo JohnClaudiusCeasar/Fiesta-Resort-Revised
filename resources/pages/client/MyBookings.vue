@@ -19,7 +19,18 @@
     </header>
 
     <main class="max-w-5xl mx-auto py-12 px-4">
-      <h2 class="text-3xl font-bold mb-8">My Reservations</h2>
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold">My Reservations</h2>
+        <button 
+          @click="openNewBookingModal"
+          class="bg-[#00B4FF] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#009CE0] transition-colors flex items-center gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          New Booking
+        </button>
+      </div>
 
       <div v-if="bookings.length === 0" class="bg-white p-12 text-center rounded-2xl shadow-sm border border-gray-100">
         <div class="text-6xl mb-4">🌴</div>
@@ -173,16 +184,56 @@
         </div>
       </div>
     </Transition>
+
+    <BookingModal 
+      :show="bookingModal.show"
+      :room="bookingModal.room"
+      @close="closeBookingModal"
+      @booking-created="onBookingCreated"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { ref, computed, onMounted } from 'vue';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import BookingModal from './BookingModal.vue';
 
 const props = defineProps({
   bookings: Array
 });
+
+const page = usePage();
+
+const bookingModal = ref({
+  show: false,
+  room: null
+});
+
+onMounted(() => {
+  if (page.props.selectedRoom) {
+    bookingModal.value = {
+      show: true,
+      room: page.props.selectedRoom
+    };
+  }
+});
+
+const openNewBookingModal = () => {
+  bookingModal.value = {
+    show: true,
+    room: null
+  };
+};
+
+const closeBookingModal = () => {
+  bookingModal.value.show = false;
+};
+
+const onBookingCreated = () => {
+  // Refresh bookings after creating a new booking
+  router.reload({ only: ['bookings'] });
+};
 
 const activeTab = ref('all');
 
