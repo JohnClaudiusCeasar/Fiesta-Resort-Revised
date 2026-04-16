@@ -99,6 +99,13 @@ class AdminController extends Controller
             'occupiedRooms' => Room::where('status', 'occupied')->count(),
             'reservedRooms' => Room::where('status', 'reserved')->count(),
             'totalGuests' => Guest::count(),
+            'totalRevenue' => Booking::sum('total_price'),
+            'dailyRevenue' => Booking::whereDate('check_in', today())->sum('total_price'),
+            'monthlyRevenue' => Booking::whereMonth('check_in', now()->month)->whereYear('check_in', now()->year)->sum('total_price'),
+            'yearlyRevenue' => Booking::whereYear('check_in', now()->year)->sum('total_price'),
+            'weeklyRevenue' => $this->getWeeklyRevenue(),
+            'monthlyRevenueData' => $this->getMonthlyRevenueData(),
+            'yearlyRevenueData' => $this->getYearlyRevenueData(),
         ];
 
         return Inertia::render($component, [
@@ -178,5 +185,52 @@ class AdminController extends Controller
             'guests' => $guests,
             'rooms' => $rooms,
         ]);
+    }
+
+    private function getWeeklyRevenue()
+    {
+        $data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->toDateString();
+            $revenue = Booking::whereDate('check_in', $date)->sum('total_price');
+            $data[] = [
+                'date' => $date,
+                'revenue' => $revenue,
+            ];
+        }
+
+        return $data;
+    }
+
+    private function getMonthlyRevenueData()
+    {
+        $data = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $revenue = Booking::whereMonth('check_in', $month->month)
+                ->whereYear('check_in', $month->year)
+                ->sum('total_price');
+            $data[] = [
+                'month' => $month->format('M Y'),
+                'revenue' => $revenue,
+            ];
+        }
+
+        return $data;
+    }
+
+    private function getYearlyRevenueData()
+    {
+        $data = [];
+        for ($i = 4; $i >= 0; $i--) {
+            $year = now()->subYears($i);
+            $revenue = Booking::whereYear('check_in', $year->year)->sum('total_price');
+            $data[] = [
+                'year' => $year->year,
+                'revenue' => $revenue,
+            ];
+        }
+
+        return $data;
     }
 }
