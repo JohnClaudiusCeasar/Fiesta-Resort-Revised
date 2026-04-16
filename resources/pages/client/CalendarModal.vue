@@ -415,6 +415,9 @@ const selectDate = (day, monthCal = 'current') => {
 };
 
 const cancel = () => {
+  checkInDate.value = null;
+  checkOutDate.value = null;
+  selectingCheckIn.value = true;
   isOpen.value = false;
   emit('update:isOpen', false);
 };

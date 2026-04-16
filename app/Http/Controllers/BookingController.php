@@ -179,6 +179,19 @@ class BookingController extends Controller
             'selectedRoom' => $selectedRoom,
             'checkIn' => $request->get('checkIn'),
             'checkOut' => $request->get('checkOut'),
+            'rooms' => Room::all()->map(function ($room) {
+                return [
+                    'id' => $room->id,
+                    'number' => $room->number,
+                    'name' => $room->name,
+                    'type' => $room->type,
+                    'capacity' => $room->capacity,
+                    'price_per_night' => $room->price_per_night,
+                    'photo' => $room->photo,
+                    'discount' => $room->discount ?? 0,
+                    'status' => $room->status,
+                ];
+            }),
         ]);
     }
 }

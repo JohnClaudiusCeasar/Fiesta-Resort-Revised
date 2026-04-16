@@ -18,30 +18,118 @@
       </div>
     </header>
 
-    <main class="max-w-5xl mx-auto py-12 px-4">
-      <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-bold">My Reservations</h2>
-        <button 
-          @click="openNewBookingModal"
-          class="bg-[#00B4FF] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#009CE0] transition-colors flex items-center gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          New Booking
-        </button>
-      </div>
+    <main class="max-w-6xl mx-auto py-12 px-4">
+      <h2 class="text-3xl font-bold mb-8">My Reservations</h2>
 
-      <div v-if="bookings.length === 0" class="bg-white p-12 text-center rounded-2xl shadow-sm border border-gray-100">
-        <div class="text-6xl mb-4">🌴</div>
-        <h3 class="text-xl font-semibold mb-2">No bookings yet</h3>
-        <p class="text-gray-500 mb-6">Looks like you haven't booked a stay with us yet.</p>
-        <Link href="/#booking" class="bg-[#00B4FF] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#009CE0] transition-colors">
-          Explore Rooms
-        </Link>
-      </div>
+      <section class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-xl font-bold text-gray-800">All Rooms</h3>
+        </div>
 
-      <div v-else>
+        <div class="bg-white rounded-2xl p-4 mb-6 shadow-sm border border-gray-100">
+          <div class="flex flex-wrap gap-4 items-end">
+            <div class="flex-1 min-w-[200px]">
+              <CalendarModal 
+                ref="calendarModalRef"
+                mode="range"
+                :initialCheckIn="filters.checkIn"
+                :initialCheckOut="filters.checkOut"
+                @update:checkIn="handleCheckInUpdate"
+                @update:checkOut="handleCheckOutUpdate"
+              />
+            </div>
+            <div class="w-auto">
+              <label class="block text-xs text-gray-500 mb-1 font-medium">Guests</label>
+              <div class="flex items-center gap-2">
+                <button 
+                  @click="decrementGuests"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                  :disabled="filters.guests <= 1"
+                >
+                  <span class="text-sm">−</span>
+                </button>
+                <span class="w-6 text-center font-medium">{{ filters.guests }}</span>
+                <button 
+                  @click="incrementGuests"
+                  class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <span class="text-sm">+</span>
+                </button>
+              </div>
+            </div>
+            <button 
+              @click="clearFilters"
+              class="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors border border-gray-200"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+          <div 
+            v-for="room in filteredRooms" 
+            :key="room.id"
+            class="shrink-0 w-72 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden transition-all"
+            :class="{ 'opacity-60': !isRoomAvailable(room) }"
+          >
+            <div class="relative h-36 bg-gray-200">
+              <img 
+                v-if="room.photo" 
+                :src="room.photo" 
+                :alt="room.name"
+                class="w-full h-full object-cover"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center text-4xl">
+                🏨
+              </div>
+              <span 
+                class="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold"
+                :class="statusBadgeClasses[room.status]"
+              >
+                {{ formatStatus(room.status) }}
+              </span>
+            </div>
+            
+            <div class="p-4">
+              <div class="mb-2">
+                <p class="text-xs text-gray-400 font-medium uppercase">Room {{ room.number }}</p>
+                <h4 class="font-bold text-gray-800">{{ room.name }}</h4>
+                <p class="text-sm text-gray-500">{{ room.type }} &bull; Max {{ room.capacity }} guests</p>
+              </div>
+              
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-lg font-bold text-gray-800">${{ room.price_per_night }}</span>
+                  <span class="text-sm text-gray-500">/night</span>
+                </div>
+                <span v-if="room.discount" class="text-xs text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
+                  {{ room.discount }}% off
+                </span>
+              </div>
+              
+              <button 
+                @click="bookRoom(room)"
+                :disabled="!isRoomAvailable(room)"
+                class="w-full py-2 rounded-lg font-semibold text-sm transition-colors"
+                :class="isRoomAvailable(room) 
+                  ? 'bg-[#00B4FF] hover:bg-[#009CE0] text-white' 
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'"
+              >
+                {{ isRoomAvailable(room) ? 'Book Now' : 'Unavailable' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="filteredRooms.length === 0" class="bg-white p-8 text-center rounded-xl border border-gray-100">
+          <p class="text-gray-500">No rooms available.</p>
+        </div>
+      </section>
+
+      <section v-if="bookings.length > 0">
+        <h3 class="text-xl font-bold text-gray-800 mb-6">My Reservations</h3>
+
         <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
           <button 
             v-for="tab in tabs" 
@@ -159,6 +247,12 @@
             <p class="text-gray-500">No {{ activeTab }} bookings found.</p>
           </div>
         </div>
+      </section>
+
+      <div v-if="bookings.length === 0" class="bg-white p-12 text-center rounded-2xl shadow-sm border border-gray-100">
+        <div class="text-6xl mb-4">🌴</div>
+        <h3 class="text-xl font-semibold mb-2">No bookings yet</h3>
+        <p class="text-gray-500">Select a room above to make your first reservation!</p>
       </div>
     </main>
 
@@ -188,6 +282,8 @@
     <BookingModal 
       :show="bookingModal.show"
       :room="bookingModal.room"
+      :initial-check-in="bookingModal.checkIn"
+      :initial-check-out="bookingModal.checkOut"
       @close="closeBookingModal"
       @booking-created="onBookingCreated"
     />
@@ -198,31 +294,119 @@
 import { ref, computed, onMounted } from 'vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import BookingModal from './BookingModal.vue';
+import CalendarModal from './CalendarModal.vue';
 
 const props = defineProps({
-  bookings: Array
+  bookings: Array,
+  rooms: Array,
+  selectedRoom: Object,
+  checkIn: String,
+  checkOut: String
 });
 
 const page = usePage();
 
-const bookingModal = ref({
-  show: false,
-  room: null
+const today = computed(() => {
+  return new Date().toISOString().split('T')[0];
 });
 
+const calendarModalRef = ref(null);
+
+const handleCheckInUpdate = (dateStr) => {
+  filters.value.checkIn = formatToISO(dateStr);
+};
+
+const handleCheckOutUpdate = (dateStr) => {
+  filters.value.checkOut = formatToISO(dateStr);
+};
+
+const formatToISO = (dateStr) => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  return date.toISOString().split('T')[0];
+};
+
+const bookingModal = ref({
+  show: false,
+  room: null,
+  checkIn: '',
+  checkOut: ''
+});
+
+const filters = ref({
+  checkIn: '',
+  checkOut: '',
+  guests: 2
+});
+
+const statusBadgeClasses = {
+  'available': 'bg-green-100 text-green-700',
+  'unavailable': 'bg-gray-200 text-gray-600',
+  'occupied': 'bg-orange-100 text-orange-700',
+  'reserved': 'bg-blue-100 text-blue-700'
+};
+
+const formatStatus = (status) => {
+  const statusMap = {
+    'available': 'Available',
+    'unavailable': 'Unavailable',
+    'occupied': 'Occupied',
+    'reserved': 'Reserved'
+  };
+  return statusMap[status] || status;
+};
+
+const isRoomAvailable = (room) => {
+  return room.status === 'available';
+};
+
+const filteredRooms = computed(() => {
+  if (!props.rooms) return [];
+  
+  let rooms = [...props.rooms];
+  
+  if (filters.value.guests > 0) {
+    rooms = rooms.filter(room => room.capacity >= filters.value.guests);
+  }
+  
+  return rooms;
+});
+
+const incrementGuests = () => {
+  filters.value.guests++;
+};
+
+const decrementGuests = () => {
+  if (filters.value.guests > 1) {
+    filters.value.guests--;
+  }
+};
+
+const clearFilters = () => {
+  filters.value = {
+    checkIn: '',
+    checkOut: '',
+    guests: 2
+  };
+};
+
 onMounted(() => {
-  if (page.props.selectedRoom) {
+  if (props.selectedRoom) {
     bookingModal.value = {
       show: true,
-      room: page.props.selectedRoom
+      room: props.selectedRoom,
+      checkIn: props.checkIn || '',
+      checkOut: props.checkOut || ''
     };
   }
 });
 
-const openNewBookingModal = () => {
+const bookRoom = (room) => {
   bookingModal.value = {
     show: true,
-    room: null
+    room: room,
+    checkIn: filters.value.checkIn,
+    checkOut: filters.value.checkOut
   };
 };
 
@@ -231,7 +415,6 @@ const closeBookingModal = () => {
 };
 
 const onBookingCreated = () => {
-  // Refresh bookings after creating a new booking
   router.reload({ only: ['bookings'] });
 };
 
@@ -325,5 +508,14 @@ const confirmCancel = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
