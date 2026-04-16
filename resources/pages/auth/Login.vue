@@ -113,8 +113,6 @@ const submit = () => {
     },
     onSuccess: () => {
       hasError.value = false;
-      // Redirect to dashboard after successful login using Inertia router
-      router.visit('/');
     }
   });
 };

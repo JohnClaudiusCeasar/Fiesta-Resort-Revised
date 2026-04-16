@@ -10,7 +10,7 @@ class CheckAdmin
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
+        if (! Auth::check() || Auth::user()->email !== 'admin@gmail.com') {
             abort(403, 'Unauthorized');
         }
 

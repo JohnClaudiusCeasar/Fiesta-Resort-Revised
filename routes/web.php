@@ -38,33 +38,35 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 });
 
-// Admin Routes
-// Specific routes
-Route::get('/admin/guests', [AdminController::class, 'guests']);
+// Admin Routes (Protected by admin middleware)
+Route::middleware('admin')->group(function () {
+    // Specific routes
+    Route::get('/admin/guests', [AdminController::class, 'guests']);
 
-// Admin - Booking Routes
-Route::prefix('admin/bookings')->group(function () {
-    // 1. Route for updating status (Confirm/Cancel)
-    Route::patch('/{booking}/status', [BookingController::class, 'updateStatus']);
+    // Admin - Booking Routes
+    Route::prefix('admin/bookings')->group(function () {
+        // 1. Route for updating status (Confirm/Cancel)
+        Route::patch('/{booking}/status', [BookingController::class, 'updateStatus']);
 
-    // 2. Route for the Edit Modal (Save Changes)
-    Route::put('/{booking}', [BookingController::class, 'update']);
+        // 2. Route for the Edit Modal (Save Changes)
+        Route::put('/{booking}', [BookingController::class, 'update']);
 
-    // 3. Route for Deleting
-    Route::delete('/{booking}', [BookingController::class, 'destroy']);
+        // 3. Route for Deleting
+        Route::delete('/{booking}', [BookingController::class, 'destroy']);
+    });
+
+    // Admin - Guests Routes
+    Route::post('/admin/guests', [GuestController::class, 'store'])->name('admin.guests.store');
+    Route::delete('/admin/guests/{guest}', [GuestController::class, 'destroy'])->name('admin.guests.destroy');
+    Route::put('/admin/guests/{guest}', [GuestController::class, 'update'])->name('admin.guests.update');
+    Route::patch('/admin/guests/{guest}/blacklist', [GuestController::class, 'blacklist'])->name('admin.guest.update');
+
+    // Admin - Room Routes
+    Route::resource('rooms', RoomController::class);
+    Route::post('/rooms/{room}/status', [RoomController::class, 'setStatus'])->name('rooms.setStatus');
+
+    // Wildcard
+    Route::get('/admin/{any?}', [AdminController::class, 'show'])
+        ->where('any', '.*')
+        ->name('admin');
 });
-
-// Admin - Guests Routes
-Route::post('/admin/guests', [GuestController::class, 'store'])->name('admin.guests.store');
-Route::delete('/admin/guests/{guest}', [GuestController::class, 'destroy'])->name('admin.guests.destroy');
-Route::put('/admin/guests/{guest}', [GuestController::class, 'update'])->name('admin.guests.update');
-Route::patch('/admin/guests/{guest}/blacklist', [GuestController::class, 'blacklist'])->name('admin.guest.update');
-
-// Admin - Room Routes
-Route::resource('rooms', RoomController::class);
-Route::post('/rooms/{room}/status', [RoomController::class, 'setStatus'])->name('rooms.setStatus');
-
-// Wildcard
-Route::get('/admin/{any?}', [AdminController::class, 'show'])
-    ->where('any', '.*')
-    ->name('admin');

