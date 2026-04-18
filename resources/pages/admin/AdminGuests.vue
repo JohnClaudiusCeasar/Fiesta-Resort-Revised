@@ -141,15 +141,23 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn view"      title="View Details"  @click="openModal(guest, 'view')">👁</button>
-                  <button class="action-btn edit"      title="Edit Guest"    @click="openModal(guest, 'edit')">✏️</button>
-                  <button class="action-btn delete"    title="Delete Guest"  @click="openModal(guest, 'delete')">🗑</button>
+                  <button class="action-btn view"      title="View Details"  @click="openModal(guest, 'view')">
+                    <img :src="viewIcon" alt="View" />
+                  </button>
+                  <button class="action-btn edit"      title="Edit Guest"    @click="openModal(guest, 'edit')">
+                    <img :src="editIcon" alt="Edit" />
+                  </button>
+                  <button class="action-btn delete"    title="Delete Guest"  @click="openModal(guest, 'delete')">
+                    <img :src="trashIcon" alt="Delete" />
+                  </button>
                   <button
                     class="action-btn blacklist"
                     title="Blacklist Guest"
                     @click="openModal(guest, 'blacklist')"
                     v-if="guest.status !== 'Blacklisted'"
-                  >🚫</button>
+                  >
+                    <img :src="cancelIcon" alt="Blacklist" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -392,6 +400,11 @@ import { router } from '@inertiajs/vue3';
 import { onMounted, onUnmounted } from 'vue';
 import AdminLayout from '../../components/AdminLayout.vue';
 
+import viewIcon from '../../assets/view_action_logo.svg';
+import editIcon from '../../assets/edit_action_logo.svg';
+import trashIcon from '../../assets/trash_action_logo.svg';
+import cancelIcon from '../../assets/cancel_action_logo.svg';
+
 export default {
   name: 'AdminGuests',
   components: { AdminLayout },
@@ -418,6 +431,11 @@ export default {
       selectedGuest: null,
       editForm: {},
       addForm: { name: '', email: '', phone: '', nationality: '', roomId: '', check_in: '', check_out: '', createBooking: false },
+
+      viewIcon,
+      editIcon,
+      trashIcon,
+      cancelIcon,
 
       pollingInterval: null
     }
@@ -864,6 +882,11 @@ export default {
 }
 
 .action-btn:hover { transform: translateY(-1px); }
+.action-btn img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
 .action-btn.view:hover      { background: #EFF6FF; border-color: #BFDBFE; }
 .action-btn.edit:hover      { background: #FFFBEB; border-color: #FDE68A; }
 .action-btn.blacklist:hover { background: #FEF2F2; border-color: #FECACA; }

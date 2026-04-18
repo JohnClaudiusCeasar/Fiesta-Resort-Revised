@@ -128,8 +128,12 @@
               </button>
             </div>
             <div class="card-action-icons">
-              <button class="action-btn edit" title="Edit" @click="openModal(room, 'edit')">✏️</button>
-              <button class="action-btn cancel" title="Delete" @click="openModal(room, 'delete')">🗑</button>
+              <button class="action-btn edit" title="Edit" @click="openModal(room, 'edit')">
+                <img :src="editIcon" alt="Edit" />
+              </button>
+              <button class="action-btn cancel" title="Delete" @click="openModal(room, 'delete')">
+                <img :src="trashIcon" alt="Delete" />
+              </button>
             </div>
           </div>
         </div>
@@ -212,14 +216,14 @@
                     :title="'Edit'"
                     @click="openModal(room, 'edit')"
                   >
-                    ✏️
+                    <img :src="editIcon" alt="Edit" />
                   </button>
                   <button
                     class="action-btn cancel"
                     :title="'Delete'"
                     @click="openModal(room, 'delete')"
                   >
-                    🗑
+                    <img :src="trashIcon" alt="Delete" />
                   </button>
                 </div>
               </td>
@@ -361,6 +365,10 @@
 <script>
 import AdminLayout from '../../components/AdminLayout.vue'
 
+import viewIcon from '../../assets/view_action_logo.svg';
+import editIcon from '../../assets/edit_action_logo.svg';
+import trashIcon from '../../assets/trash_action_logo.svg';
+
 export default {    
   name: 'AdminRooms',
   components: { AdminLayout },
@@ -381,7 +389,11 @@ export default {
       showModal: false,
       modalMode: 'add',         // 'add' | 'edit' | 'delete'
       selectedRoom: null,
-      roomForm: this.emptyForm()
+      roomForm: this.emptyForm(),
+
+      viewIcon,
+      editIcon,
+      trashIcon
     }
   },
 
@@ -913,6 +925,11 @@ export default {
 }
 
 .action-btn:hover       { transform: translateY(-1px); }
+.action-btn img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
 .action-btn.edit:hover  { background: #FFFBEB; border-color: #FDE68A; }
 .action-btn.cancel:hover { background: #FEF2F2; border-color: #FECACA; }
 .action-btn-active { background: #ECFDF5 !important; border-color: #10B981 !important; }

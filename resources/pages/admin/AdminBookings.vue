@@ -78,10 +78,18 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button class="action-btn view" @click="openModal(booking, 'view')" title="View">👁</button>
-                  <button v-if="booking.status === 'Pending'" class="action-btn confirm" @click="openModal(booking, 'confirm')" title="Confirm">✅</button>
-                  <button class="action-btn edit" @click="openModal(booking, 'edit')" title="Edit">✏️</button>
-                  <button class="action-btn cancel" @click="openModal(booking, 'cancel')" title="Cancel">🚫</button>
+                  <button class="action-btn view" @click="openModal(booking, 'view')" title="View">
+                    <img :src="viewIcon" alt="View" />
+                  </button>
+                  <button v-if="booking.status === 'Pending'" class="action-btn confirm" @click="openModal(booking, 'confirm')" title="Confirm">
+                    <img :src="confirmIcon" alt="Confirm" />
+                  </button>
+                  <button class="action-btn edit" @click="openModal(booking, 'edit')" title="Edit">
+                    <img :src="editIcon" alt="Edit" />
+                  </button>
+                  <button class="action-btn cancel" @click="openModal(booking, 'cancel')" title="Cancel">
+                    <img :src="cancelIcon" alt="Cancel" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -113,6 +121,11 @@ import AdminLayout from '../../components/AdminLayout.vue'
 import ViewBookingDetailsModal from '../../components/ViewBookingDetailsModal.vue'
 import { router } from '@inertiajs/vue3'
 
+import viewIcon from '../../assets/view_action_logo.svg'
+import confirmIcon from '../../assets/confirm_action_logo.svg'
+import editIcon from '../../assets/edit_action_logo.svg'
+import cancelIcon from '../../assets/cancel_action_logo.svg'
+
 export default {
   name: 'AdminBookings',
   components: { AdminLayout, ViewBookingDetailsModal },
@@ -130,6 +143,10 @@ export default {
       showModal: false,
       modalMode: '',
       selectedBooking: null,
+      viewIcon,
+      confirmIcon,
+      editIcon,
+      cancelIcon,
       editForm: {
         id: null,
         check_in: '', // Use database-style snake_case to match Laravel update
@@ -369,9 +386,10 @@ export default {
 .action-btn:hover {
   transform: translateY(-1px);
 }
- 
-.action-btn.view:hover   { background: #EFF6FF; border-color: #BFDBFE; }
-.action-btn.confirm:hover { background: #ECFDF5; border-color: #6EE7B7; }
-.action-btn.edit:hover   { background: #FFFBEB; border-color: #FDE68A; }
-.action-btn.cancel:hover { background: #FEF2F2; border-color: #FECACA; }
+
+.action-btn img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
 </style>
