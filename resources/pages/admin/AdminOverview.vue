@@ -7,166 +7,181 @@
       <p class="page-subtitle">Here's what's happening at Fiesta Resort today.</p>
     </div>
 
-    <!-- Stat Cards - Room Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Today's Bookings</span>
-          <div class="stat-icon">📅</div>
+    <!-- Main Content - Two Columns with Divider -->
+    <div style="display: flex; gap: 0; flex-wrap: wrap;">
+      
+      <!-- Left Column - Revenue Section -->
+      <div style="flex: 1; min-width: 400px; padding-right: 24px; border-right: 1px solid #e5e7eb;">
+        
+        <!-- Revenue Stats Grid (2x2) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Total Revenue</span>
+              <div class="stat-icon">💰</div>
+            </div>
+            <div class="stat-value">${{ formatNumber(stats.totalRevenue) }}</div>
+            <div class="stat-change">All time</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Monthly Revenue</span>
+              <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-value">${{ formatNumber(stats.monthlyRevenue) }}</div>
+            <div class="stat-change">This month</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Daily Revenue</span>
+              <div class="stat-icon">📈</div>
+            </div>
+            <div class="stat-value">${{ formatNumber(stats.dailyRevenue) }}</div>
+            <div class="stat-change">Today</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Yearly Revenue</span>
+              <div class="stat-icon">💵</div>
+            </div>
+            <div class="stat-value">${{ formatNumber(stats.yearlyRevenue) }}</div>
+            <div class="stat-change">This year</div>
+          </div>
         </div>
-        <div class="stat-value">{{ stats.todayBookings }}</div>
-        <div class="stat-change up">↑ 3 from yesterday</div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Available Rooms</span>
-          <div class="stat-icon">🛏️</div>
+        <!-- Revenue Chart -->
+        <div class="admin-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <div>
+              <div class="page-title" style="font-size:15px;">Revenue Trends</div>
+              <div class="page-subtitle" style="font-size:12px; margin-top:2px;">Track your revenue over time</div>
+            </div>
+          </div>
+
+          <!-- Period Toggle -->
+          <div style="display:flex; gap:8px; margin-bottom:20px;">
+            <button
+              v-for="period in periods"
+              :key="period.value"
+              @click="selectedPeriod = period.value"
+              :class="['period-btn', { active: selectedPeriod === period.value }]"
+            >
+              {{ period.label }}
+            </button>
+          </div>
+
+          <!-- Chart -->
+          <div class="chart-container">
+            <apexchart
+              type="area"
+              height="300"
+              :options="chartOptions"
+              :series="chartSeries"
+            />
+          </div>
         </div>
-        <div class="stat-value">{{ stats.availableRooms }}</div>
-        <div class="stat-change">of {{ stats.totalRooms }} total rooms</div>
+
       </div>
 
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Occupied Rooms</span>
-          <div class="stat-icon">🔑</div>
+      <!-- Right Column - Booking Section -->
+      <div style="flex: 1; min-width: 400px; padding-left: 24px;">
+        
+        <!-- Booking Stats Grid (2x2) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Today's Bookings</span>
+              <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-value">{{ stats.todayBookings }}</div>
+            <div class="stat-change up">↑ 3 from yesterday</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Occupied Rooms</span>
+              <div class="stat-icon">🔑</div>
+            </div>
+            <div class="stat-value">{{ stats.occupiedRooms }}</div>
+            <div class="stat-change">{{ occupancyRate }}% occupancy rate</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Available Rooms</span>
+              <div class="stat-icon">🛏️</div>
+            </div>
+            <div class="stat-value">{{ stats.availableRooms }}</div>
+            <div class="stat-change">of {{ stats.totalRooms }} total rooms</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-label">Reserved Rooms</span>
+              <div class="stat-icon">📅</div>
+            </div>
+            <div class="stat-value">{{ stats.reservedRooms }}</div>
+            <div class="stat-change">rooms booked for later</div>
+          </div>
         </div>
-        <div class="stat-value">{{ stats.occupiedRooms }}</div>
-        <div class="stat-change">{{ occupancyRate }}% occupancy rate</div>
-      </div>
 
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Reserved Rooms</span>
-          <div class="stat-icon">📅</div>
+        <!-- Recent Bookings Table -->
+        <div class="admin-card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <div>
+              <div class="page-title" style="font-size:15px;">Recent Bookings</div>
+              <div class="page-subtitle" style="font-size:12px; margin-top:2px;">Latest 5 reservations</div>
+            </div>
+            <Link href="/admin/bookings" class="btn btn-secondary" style="font-size:12.5px; padding:6px 14px;">
+              View All →
+            </Link>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Booking ID</th>
+                  <th>Guest</th>
+                  <th>Room</th>
+                  <th>Check-in</th>
+                  <th>Check-out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="booking in recentBookings" :key="booking.id">
+                  <td>
+                    <span style="font-family: var(--font-mono); font-size:12px; color: var(--admin-blue);">
+                      #{{ booking.display_id }}
+                    </span>
+                  </td>
+                  <td>{{ booking.guest }}</td>
+                  <td>{{ booking.room }}</td>
+                  <td>{{ booking.checkIn }}</td>
+                  <td>{{ booking.checkOut }}</td>
+                  <td>
+                    <span class="badge" :class="badgeClass(booking.status)">
+                      {{ booking.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div v-if="recentBookings.length === 0" class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">No bookings yet</div>
+              <div class="empty-text">Recent reservations will appear here.</div>
+            </div>
+          </div>
         </div>
-        <div class="stat-value">{{ stats.reservedRooms }}</div>
-        <div class="stat-change">rooms booked for later</div>
-      </div>
-    </div>
 
-    <!-- Revenue Stats -->
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Total Revenue</span>
-          <div class="stat-icon">💰</div>
-        </div>
-        <div class="stat-value">${{ formatNumber(stats.totalRevenue) }}</div>
-        <div class="stat-change">All time</div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Daily Revenue</span>
-          <div class="stat-icon">📈</div>
-        </div>
-        <div class="stat-value">${{ formatNumber(stats.dailyRevenue) }}</div>
-        <div class="stat-change">Today</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Monthly Revenue</span>
-          <div class="stat-icon">📅</div>
-        </div>
-        <div class="stat-value">${{ formatNumber(stats.monthlyRevenue) }}</div>
-        <div class="stat-change">This month</div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-header">
-          <span class="stat-label">Yearly Revenue</span>
-          <div class="stat-icon">💵</div>
-        </div>
-        <div class="stat-value">${{ formatNumber(stats.yearlyRevenue) }}</div>
-        <div class="stat-change">This year</div>
-      </div>
-    </div>
-
-    <!-- Revenue Chart -->
-    <div class="admin-card">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-        <div>
-          <div class="page-title" style="font-size:15px;">Revenue Trends</div>
-          <div class="page-subtitle" style="font-size:12px; margin-top:2px;">Track your revenue over time</div>
-        </div>
-      </div>
-
-      <!-- Period Toggle -->
-      <div style="display:flex; gap:8px; margin-bottom:20px;">
-        <button
-          v-for="period in periods"
-          :key="period.value"
-          @click="selectedPeriod = period.value"
-          :class="['period-btn', { active: selectedPeriod === period.value }]"
-        >
-          {{ period.label }}
-        </button>
-      </div>
-
-      <!-- Chart -->
-      <div class="chart-container">
-        <apexchart
-          type="area"
-          height="300"
-          :options="chartOptions"
-          :series="chartSeries"
-        />
-      </div>
-    </div>
-
-    <!-- Recent Bookings Table -->
-    <div class="admin-card">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-        <div>
-          <div class="page-title" style="font-size:15px;">Recent Bookings</div>
-          <div class="page-subtitle" style="font-size:12px; margin-top:2px;">Latest 5 reservations</div>
-        </div>
-        <Link href="/admin/bookings" class="btn btn-secondary" style="font-size:12.5px; padding:6px 14px;">
-          View All →
-        </Link>
-      </div>
-
-      <div class="admin-table-wrap">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Booking ID</th>
-              <th>Guest</th>
-              <th>Room</th>
-              <th>Check-in</th>
-              <th>Check-out</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="booking in recentBookings" :key="booking.id">
-              <td>
-                <span style="font-family: var(--font-mono); font-size:12px; color: var(--admin-blue);">
-                  #{{ booking.display_id }}
-                </span>
-              </td>
-              <td>{{ booking.guest }}</td>
-              <td>{{ booking.room }}</td>
-              <td>{{ booking.checkIn }}</td>
-              <td>{{ booking.checkOut }}</td>
-              <td>
-                <span class="badge" :class="badgeClass(booking.status)">
-                  {{ booking.status }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div v-if="recentBookings.length === 0" class="empty-state">
-          <div class="empty-icon">📋</div>
-          <div class="empty-title">No bookings yet</div>
-          <div class="empty-text">Recent reservations will appear here.</div>
-        </div>
-      </div>
     </div>
 
   </AdminLayout>

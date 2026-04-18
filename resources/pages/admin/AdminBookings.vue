@@ -95,88 +95,27 @@
       </div>
     </div>
  
-    <Transition name="fade">
-      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-        <div class="modal-box booking-modal">
- 
-          <template v-if="modalMode === 'view'">
-            <div class="modal-header">
-              <div>
-                <div class="modal-booking-id">#{{ selectedBooking.display_id }}</div>
-                <h3 class="modal-title">Booking Details</h3>
-              </div>
-              <span class="status-badge" :class="badgeClass(selectedBooking.status)">{{ selectedBooking.status }}</span>
-            </div>
-            <div class="modal-detail-grid">
-               <div class="detail-item"><span class="detail-label">Guest</span><span class="detail-value">{{ selectedBooking.guest }}</span></div>
-               <div class="detail-item"><span class="detail-label">Room</span><span class="detail-value">{{ selectedBooking.room }}</span></div>
-               <div class="detail-item"><span class="detail-label">Check-in</span><span class="detail-value">{{ selectedBooking.checkIn }}</span></div>
-               <div class="detail-item"><span class="detail-label">Check-out</span><span class="detail-value">{{ selectedBooking.checkOut }}</span></div>
-            </div>
-            <div class="modal-actions">
-              <button class="btn-secondary" @click="closeModal">Close</button>
-            </div>
-          </template>
- 
-          <template v-else-if="modalMode === 'confirm'">
-            <div class="modal-icon">✔️</div>
-            <h3 class="modal-title">Confirm Booking?</h3>
-            <p class="modal-text">Confirm booking #{{ selectedBooking.display_id }} for {{ selectedBooking.guest }}?</p>
-            <div class="modal-actions">
-              <button class="btn-secondary" @click="closeModal">Cancel</button>
-              <button class="btn-primary" @click="confirmBooking">Yes, Confirm</button>
-            </div>
-          </template>
- 
-          <template v-else-if="modalMode === 'edit'">
-            <div class="modal-header">
-               <h3 class="modal-title">Edit Booking #{{ selectedBooking.display_id }}</h3>
-            </div>
-            <div class="modal-form">
-               <div class="form-row">
-                  <div class="form-group">
-                     <label class="form-label">Check-in</label>
-                     <input class="form-input" type="date" v-model="editForm.check_in" />
-                  </div>
-                  <div class="form-group">
-                     <label class="form-label">Check-out</label>
-                     <input class="form-input" type="date" v-model="editForm.check_out" />
-                  </div>
-               </div>
-               <div class="form-group">
-                  <label class="form-label">Special Requests</label>
-                  <textarea class="form-input form-textarea" v-model="editForm.notes"></textarea>
-               </div>
-            </div>
-            <div class="modal-actions">
-              <button class="btn-secondary" @click="closeModal">Cancel</button>
-              <button class="btn-primary" @click="saveEdit">Save Changes</button>
-            </div>
-          </template>
- 
-          <template v-else-if="modalMode === 'cancel'">
-            <div class="modal-icon">🚫</div>
-            <h3 class="modal-title">Cancel Booking?</h3>
-            <p class="modal-text">This will cancel booking #{{ selectedBooking.display_id }}.</p>
-            <div class="modal-actions">
-              <button class="btn-secondary" @click="closeModal">Go Back</button>
-              <button class="btn-danger" @click="cancelBooking">Yes, Cancel It</button>
-            </div>
-          </template>
- 
-        </div>
-      </div>
-    </Transition>
+    <ViewBookingDetailsModal 
+        :show="showModal" 
+        :booking="selectedBooking" 
+        :mode="modalMode"
+        :edit-form="editForm"
+        @close="closeModal"
+        @confirm="confirmBooking"
+        @cancel="cancelBooking"
+        @save="saveEdit"
+      />
   </AdminLayout>
 </template>
  
 <script>
 import AdminLayout from '../../components/AdminLayout.vue'
-import { router } from '@inertiajs/vue3' // CRITICAL: Import router for DB changes
+import ViewBookingDetailsModal from '../../components/ViewBookingDetailsModal.vue'
+import { router } from '@inertiajs/vue3'
 
 export default {
   name: 'AdminBookings',
-  components: { AdminLayout },
+  components: { AdminLayout, ViewBookingDetailsModal },
   props: {
     bookings: { type: Array, default: () => [] },
     rooms: Array,
@@ -250,8 +189,8 @@ export default {
         onSuccess: () => this.closeModal()
       })
     },
-    saveEdit() {
-      router.put(`/admin/bookings/${this.editForm.id}`, this.editForm, {
+    saveEdit(formData) {
+      router.put(`/admin/bookings/${formData.id}`, formData, {
         onSuccess: () => this.closeModal()
       })
     }
@@ -435,175 +374,4 @@ export default {
 .action-btn.confirm:hover { background: #ECFDF5; border-color: #6EE7B7; }
 .action-btn.edit:hover   { background: #FFFBEB; border-color: #FDE68A; }
 .action-btn.cancel:hover { background: #FEF2F2; border-color: #FECACA; }
- 
-/* ─── Modal ──────────────────────────── */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
- 
-.modal-box {
-  background: #fff;
-  border-radius: 16px;
-  padding: 32px;
-  width: 420px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-  text-align: center;
-}
- 
-.booking-modal {
-  text-align: left;
-}
- 
-.modal-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
- 
-.modal-booking-id {
-  font-family: var(--font-mono, monospace);
-  font-size: 12px;
-  color: var(--admin-blue, #00B4FF);
-  margin-bottom: 2px;
-}
- 
-.modal-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
-}
- 
-.modal-text {
-  font-size: 13.5px;
-  color: #6B7280;
-  margin-bottom: 24px;
-  line-height: 1.6;
-  text-align: center;
-}
- 
-.modal-icon {
-  font-size: 36px;
-  margin-bottom: 12px;
-  text-align: center;
-}
- 
-/* ─── Detail Grid ────────────────────── */
-.modal-detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 24px;
-}
- 
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
- 
-.detail-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #9CA3AF;
-}
- 
-.detail-value {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: #111827;
-}
- 
-/* ─── Edit Form ──────────────────────── */
-.modal-form {
-  margin-bottom: 24px;
-}
- 
-.form-group {
-  margin-bottom: 14px;
-}
- 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
- 
-.form-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #6B7280;
-  margin-bottom: 5px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
- 
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--admin-border, #E5E7EB);
-  border-radius: 8px;
-  font-size: 13.5px;
-  color: #111827;
-  outline: none;
-  transition: border-color 0.15s;
-  box-sizing: border-box;
-}
- 
-.form-input:focus {
-  border-color: var(--admin-blue, #00B4FF);
-}
- 
-.form-textarea {
-  height: 72px;
-  resize: vertical;
-}
- 
-/* ─── Modal Actions ──────────────────── */
-.modal-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-}
- 
-.booking-modal .modal-actions {
-  justify-content: flex-end;
-}
- 
-.modal-box:not(.booking-modal) .modal-actions {
-  justify-content: center;
-}
- 
-.btn-danger {
-  background: #DC2626;
-  color: #fff;
-  border: none;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-}
- 
-.btn-danger:hover {
-  background: #B91C1C;
-}
- 
-/* ─── Fade Transition ────────────────── */
-.fade-enter-active,
-.fade-leave-active { transition: opacity 0.2s ease; }
-.fade-enter-from,
-.fade-leave-to { opacity: 0; }
 </style>
