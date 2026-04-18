@@ -213,7 +213,7 @@
                     <div class="text-right">
                       <p class="text-sm text-gray-500">Total Price</p>
                       <p class="text-xl font-bold text-gray-900">
-                        ${{ booking.total_price || calculateTotal(booking) }}
+                        - ${{ booking.total_price ? Math.abs(booking.total_price) : calculateTotal(booking) }}
                       </p>
                     </div>
                     
