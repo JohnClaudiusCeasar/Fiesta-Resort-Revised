@@ -100,10 +100,10 @@ class AdminController extends Controller
             'occupiedRooms' => Room::where('status', 'occupied')->count(),
             'reservedRooms' => Room::where('status', 'reserved')->count(),
             'totalGuests' => Guest::count(),
-            'totalRevenue' => Booking::sum(DB::raw('ABS(total_price)')),
-            'dailyRevenue' => Booking::whereDate('check_in', today())->sum(DB::raw('ABS(total_price)')),
-            'monthlyRevenue' => Booking::whereMonth('check_in', now()->month)->whereYear('check_in', now()->year)->sum(DB::raw('ABS(total_price)')),
-            'yearlyRevenue' => Booking::whereYear('check_in', now()->year)->sum(DB::raw('ABS(total_price)')),
+            'totalRevenue' => Booking::where('status', 'Confirmed')->sum(DB::raw('ABS(total_price)')),
+            'dailyRevenue' => Booking::where('status', 'Confirmed')->whereDate('check_in', today())->sum(DB::raw('ABS(total_price)')),
+            'monthlyRevenue' => Booking::where('status', 'Confirmed')->whereMonth('check_in', now()->month)->whereYear('check_in', now()->year)->sum(DB::raw('ABS(total_price)')),
+            'yearlyRevenue' => Booking::where('status', 'Confirmed')->whereYear('check_in', now()->year)->sum(DB::raw('ABS(total_price)')),
             'weeklyRevenue' => $this->getWeeklyRevenue(),
             'monthlyRevenueData' => $this->getMonthlyRevenueData(),
             'yearlyRevenueData' => $this->getYearlyRevenueData(),
@@ -193,7 +193,7 @@ class AdminController extends Controller
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->toDateString();
-            $revenue = Booking::whereDate('check_in', $date)->sum(DB::raw('ABS(total_price)'));
+            $revenue = Booking::where('status', 'Confirmed')->whereDate('check_in', $date)->sum(DB::raw('ABS(total_price)'));
             $data[] = [
                 'date' => $date,
                 'revenue' => $revenue,
@@ -208,7 +208,8 @@ class AdminController extends Controller
         $data = [];
         for ($i = 11; $i >= 0; $i--) {
             $month = now()->subMonths($i);
-            $revenue = Booking::whereMonth('check_in', $month->month)
+            $revenue = Booking::where('status', 'Confirmed')
+                ->whereMonth('check_in', $month->month)
                 ->whereYear('check_in', $month->year)
                 ->sum(DB::raw('ABS(total_price)'));
             $data[] = [
@@ -225,7 +226,7 @@ class AdminController extends Controller
         $data = [];
         for ($i = 4; $i >= 0; $i--) {
             $year = now()->subYears($i);
-            $revenue = Booking::whereYear('check_in', $year->year)->sum(DB::raw('ABS(total_price)'));
+            $revenue = Booking::where('status', 'Confirmed')->whereYear('check_in', $year->year)->sum(DB::raw('ABS(total_price)'));
             $data[] = [
                 'year' => $year->year,
                 'revenue' => $revenue,
