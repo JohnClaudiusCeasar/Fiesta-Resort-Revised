@@ -1,0 +1,19 @@
+Phase 1:
+
+	|    (Card Name)     |   <---- Card Names are; Total Bookings, Total Revenue
+	|     <number>       |
+	|    (subtitle)      |
+
+Phase 2 (triggers an animation that expands the card in phase 1 when whole card container is clicked): 
+
+	||    (Card Name)    ┇       ┇  [Combo Field|->Availaible/Occupied/Reserved]   ||  
+        ||     <number>      ┇ 2rem  ┇                 <number>                        ||
+        ||    (subtitle)     ┇       ┇                (subtitle)                       ||
+
+
+Legend:
+   || - Card Container
+   <> - GET value data from DB
+   () - Static/Interactable Label
+   ┇┇ - Gap/Spacing   
+   [] - Input Field

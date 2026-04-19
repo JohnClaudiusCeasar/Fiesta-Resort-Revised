@@ -13,42 +13,26 @@
       <!-- Left Column - Revenue Section -->
       <div style="flex: 1; min-width: 400px; padding-right: 24px; border-right: 1px solid #e5e7eb;">
         
-        <!-- Revenue Stats Grid (2x2) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Total Revenue</span>
-              <div class="stat-icon">💰</div>
-            </div>
-            <div class="stat-value">${{ formatNumber(stats.totalRevenue) }}</div>
-            <div class="stat-change">All time</div>
+        <!-- Revenue Stats Card with Navigation -->
+        <div
+          class="stat-main-card"
+          :class="{ expanded: expandedCard === 'revenue', contracted: expandedCard !== 'revenue' }"
+          @click="toggleExpand('revenue')"
+        >
+          <div class="stat-nav-header">
+            <button class="stat-nav-btn" @click.stop="cycleStat('revenue', -1)">‹</button>
+            <span class="stat-main-label">{{ revenueStats[revenueStatIndex].label }}</span>
+            <button class="stat-nav-btn" @click.stop="cycleStat('revenue', 1)">›</button>
           </div>
+          <div class="stat-main-value">${{ formatNumber(currentRevenueValue) }}</div>
+          <div class="stat-main-subtitle">{{ revenueStats[revenueStatIndex].subtitle }}</div>
 
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Monthly Revenue</span>
-              <div class="stat-icon">📅</div>
+          <!-- Expansion Combo Field -->
+          <div v-if="expandedCard === 'revenue'" class="stat-combo-field">
+            <div class="combo-item" v-for="item in revenueBreakdown" :key="item.label">
+              <div class="combo-label">{{ item.label }}</div>
+              <div class="combo-value">${{ formatNumber(item.value) }}</div>
             </div>
-            <div class="stat-value">${{ formatNumber(stats.monthlyRevenue) }}</div>
-            <div class="stat-change">This month</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Daily Revenue</span>
-              <div class="stat-icon">📈</div>
-            </div>
-            <div class="stat-value">${{ formatNumber(stats.dailyRevenue) }}</div>
-            <div class="stat-change">Today</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Yearly Revenue</span>
-              <div class="stat-icon">💵</div>
-            </div>
-            <div class="stat-value">${{ formatNumber(stats.yearlyRevenue) }}</div>
-            <div class="stat-change">This year</div>
           </div>
         </div>
 
@@ -61,25 +45,14 @@
             </div>
           </div>
 
-          <!-- Period Toggle -->
-          <div style="display:flex; gap:8px; margin-bottom:20px;">
-            <button
-              v-for="period in periods"
-              :key="period.value"
-              @click="selectedPeriod = period.value"
-              :class="['period-btn', { active: selectedPeriod === period.value }]"
-            >
-              {{ period.label }}
-            </button>
-          </div>
-
           <!-- Chart -->
           <div class="chart-container">
             <apexchart
-              type="area"
-              height="300"
-              :options="chartOptions"
-              :series="chartSeries"
+              type="donut"
+              width="100%"
+              height="320"
+              :options="simpleDonutOptions"
+              :series="[2500, 15000, 45000, 120000]"
             />
           </div>
         </div>
@@ -89,42 +62,26 @@
       <!-- Right Column - Booking Section -->
       <div style="flex: 1; min-width: 400px; padding-left: 24px;">
         
-        <!-- Booking Stats Grid (2x2) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Today's Bookings</span>
-              <div class="stat-icon">📅</div>
-            </div>
-            <div class="stat-value">{{ stats.todayBookings }}</div>
-            <div class="stat-change up">↑ 3 from yesterday</div>
+        <!-- Bookings Stats Card with Navigation -->
+        <div
+          class="stat-main-card"
+          :class="{ expanded: expandedCard === 'bookings', contracted: expandedCard !== 'bookings' }"
+          @click="toggleExpand('bookings')"
+        >
+          <div class="stat-nav-header">
+            <button class="stat-nav-btn" @click.stop="cycleStat('bookings', -1)">‹</button>
+            <span class="stat-main-label">{{ bookingStats[bookingStatIndex].label }}</span>
+            <button class="stat-nav-btn" @click.stop="cycleStat('bookings', 1)">›</button>
           </div>
+          <div class="stat-main-value">{{ currentBookingValue }}</div>
+          <div class="stat-main-subtitle">{{ bookingStats[bookingStatIndex].subtitle }}</div>
 
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Occupied Rooms</span>
-              <div class="stat-icon">🔑</div>
+          <!-- Expansion Combo Field -->
+          <div v-if="expandedCard === 'bookings'" class="stat-combo-field">
+            <div class="combo-item" v-for="item in bookingBreakdown" :key="item.label">
+              <div class="combo-label">{{ item.label }}</div>
+              <div class="combo-value">{{ item.value }}</div>
             </div>
-            <div class="stat-value">{{ stats.occupiedRooms }}</div>
-            <div class="stat-change">{{ occupancyRate }}% occupancy rate</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Available Rooms</span>
-              <div class="stat-icon">🛏️</div>
-            </div>
-            <div class="stat-value">{{ stats.availableRooms }}</div>
-            <div class="stat-change">of {{ stats.totalRooms }} total rooms</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-header">
-              <span class="stat-label">Reserved Rooms</span>
-              <div class="stat-icon">📅</div>
-            </div>
-            <div class="stat-value">{{ stats.reservedRooms }}</div>
-            <div class="stat-change">rooms booked for later</div>
           </div>
         </div>
 
@@ -194,16 +151,29 @@ import VueApexCharts from "vue3-apexcharts";
 
 export default {
   name: 'AdminOverview',
-  components: { AdminLayout, Link, apexchart: VueApexCharts },
+  components: { 
+    AdminLayout, 
+    Link,
+    apexchart: VueApexCharts
+  },
 
   data() {
     return {
-      selectedPeriod: 'weekly',
-      periods: [
-        { label: 'Weekly', value: 'weekly' },
-        { label: 'Monthly', value: 'monthly' },
-        { label: 'Yearly', value: 'yearly' },
-      ]
+      expandedCard: null,
+      bookingStatIndex: 0,
+      revenueStatIndex: 0,
+      bookingStats: [
+        { label: "Today's Bookings", getValue: (s) => s.todayBookings, subtitle: 'Check-ins today' },
+        { label: 'Available Rooms', getValue: (s) => s.availableRooms, subtitle: 'Ready for booking' },
+        { label: 'Occupied Rooms', getValue: (s) => s.occupiedRooms, subtitle: 'Currently in use' },
+        { label: 'Reserved Rooms', getValue: (s) => s.reservedRooms, subtitle: 'booked for later' },
+      ],
+      revenueStats: [
+        { label: 'Total Revenue', getValue: (s) => s.totalRevenue, subtitle: 'All time' },
+        { label: 'Daily Revenue', getValue: (s) => s.dailyRevenue, subtitle: 'Today' },
+        { label: 'Monthly Revenue', getValue: (s) => s.monthlyRevenue, subtitle: 'This month' },
+        { label: 'Yearly Revenue', getValue: (s) => s.yearlyRevenue, subtitle: 'This year' },
+      ],
     }
   },
 
@@ -240,82 +210,169 @@ export default {
       return Math.round((this.stats.occupiedRooms / this.stats.totalRooms) * 100)
     },
 
-    chartData() {
-      const data = this.stats
-      switch (this.selectedPeriod) {
-        case 'weekly':
-          return {
-            labels: data.weeklyRevenue.map(d => this.formatDate(d.date)),
-            values: data.weeklyRevenue.map(d => d.revenue)
-          }
-        case 'monthly':
-          return {
-            labels: data.monthlyRevenueData.map(d => d.month),
-            values: data.monthlyRevenueData.map(d => d.revenue)
-          }
-        case 'yearly':
-          return {
-            labels: data.yearlyRevenueData.map(d => d.year),
-            values: data.yearlyRevenueData.map(d => d.revenue)
-          }
-        default:
-          return { labels: [], values: [] }
-      }
+    currentBookingValue() {
+      return this.bookingStats[this.bookingStatIndex].getValue(this.stats)
     },
 
-    chartOptions() {
+    currentRevenueValue() {
+      return this.revenueStats[this.revenueStatIndex].getValue(this.stats)
+    },
+
+    bookingBreakdown() {
+      return [
+        { label: 'Available', value: this.stats.availableRooms },
+        { label: 'Occupied', value: this.stats.occupiedRooms },
+        { label: 'Reserved', value: this.stats.reservedRooms },
+      ]
+    },
+
+    revenueBreakdown() {
+      const weeklyVal = Array.isArray(this.stats.weeklyRevenue) 
+        ? this.stats.weeklyRevenue.reduce((sum, d) => sum + (d.revenue || 0), 0)
+        : 0
+      return [
+        { label: 'Daily', value: this.stats.dailyRevenue || 0 },
+        { label: 'Weekly', value: Math.round(weeklyVal) },
+        { label: 'Monthly', value: this.stats.monthlyRevenue || 0 },
+        { label: 'Yearly', value: this.stats.yearlyRevenue || 0 },
+      ]
+    },
+
+pieChartSeries() {
+      return [
+        this.stats.dailyRevenue || 0,
+        Array.isArray(this.stats.weeklyRevenue) ? this.stats.weeklyRevenue.reduce((sum, d) => sum + (d.revenue || 0), 0) : 0,
+        this.stats.monthlyRevenue || 0,
+        this.stats.yearlyRevenue || 0
+      ]
+    },
+
+    pieChartOptions() {
       return {
         chart: {
-          type: 'area',
-          toolbar: { show: false },
-          fontFamily: 'inherit',
-          background: 'transparent',
+          type: 'pie'
         },
-        colors: ['#00B4FF'],
-        dataLabels: { enabled: false },
-        stroke: { curve: 'smooth', width: 2 },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.4,
-            opacityTo: 0.1,
-            stops: [0, 100]
-          }
-        },
-        xaxis: {
-          categories: this.chartData.labels,
-          labels: { style: { colors: '#6b7280', fontSize: '12px' } },
-          axisBorder: { show: false },
-          axisTicks: { show: false },
-        },
-        yaxis: {
-          labels: {
-            style: { colors: '#6b7280', fontSize: '12px' },
-            formatter: (val) => '$' + this.formatNumber(val)
-          }
-        },
-        grid: {
-          borderColor: '#e5e7eb',
-          strokeDashArray: 4,
-        },
-        tooltip: {
-          y: {
-            formatter: (val) => '$' + this.formatNumber(val)
-          }
+        labels: ['Daily', 'Weekly', 'Monthly', 'Yearly'],
+        legend: {
+          position: 'bottom'
         }
       }
     },
 
-    chartSeries() {
-      return [{
-        name: 'Revenue',
-        data: this.chartData.values
-      }]
-    }
+    simpleDonutOptions() {
+      return {
+        chart: {
+          type: 'donut'
+        },
+        labels: ['Daily', 'Weekly', 'Monthly', 'Yearly'],
+        colors: ['#00B4FF', '#8B5CF6', '#10B981', '#F59E0B'],
+        plotOptions: {
+          donut: {
+            size: '65%',
+            labels: {
+              show: true,
+              name: {
+                show: true,
+                fontSize: '14px'
+              },
+              value: {
+                show: true,
+                fontSize: '18px'
+              }
+            }
+          }
+        },
+        legend: {
+          position: 'bottom'
+        },
+        dataLabels: {
+          enabled: true
+        },
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            legend: { position: 'bottom' }
+          }
+        }]
+      }
+    },
+
+    pieChartOptions() {
+      return {
+        chart: {
+          type: 'pie',
+          animations: {
+            enabled: true
+          }
+        },
+        labels: ['Daily', 'Weekly', 'Monthly', 'Yearly'],
+        colors: ['#00E5FF', '#9C27B0', '#4CAF50', '#FF9800'],
+        legend: {
+          position: 'bottom',
+          fontSize: '14px',
+          markers: {
+            size: 8
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          dropShadow: {
+            enabled: false
+          },
+          formatter: (val, opts) => {
+            return '$' + this.formatNumber(Number(val))
+          }
+        },
+        tooltip: {
+          enabled: true,
+          theme: 'light',
+          y: {
+            formatter: (val) => '$' + this.formatNumber(val)
+          }
+        },
+        fill: {
+          type: 'solid',
+          opacity: 1
+        },
+        stroke: {
+          width: 2,
+          colors: ['#fff']
+        },
+        plotOptions: {
+          pie: {
+            expandOnClick: true,
+            customScale: 1
+          }
+        },
+        responsive: [{
+          breakpoint: 480,
+          options: {
+            legend: { position: 'bottom' }
+          }
+        }]
+      }
+    },
   },
 
   methods: {
+    toggleExpand(card) {
+      if (this.expandedCard === card) {
+        this.expandedCard = null
+      } else {
+        this.expandedCard = card
+      }
+    },
+
+    cycleStat(type, direction) {
+      if (type === 'bookings') {
+        const len = this.bookingStats.length
+        this.bookingStatIndex = (this.bookingStatIndex + direction + len) % len
+      } else if (type === 'revenue') {
+        const len = this.revenueStats.length
+        this.revenueStatIndex = (this.revenueStatIndex + direction + len) % len
+      }
+    },
+
     badgeClass(status) {
       const map = {
         'Confirmed':   'badge-confirmed',
@@ -341,28 +398,123 @@ export default {
 </script>
 
 <style scoped>
-.period-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
+.stat-main-card {
   background: #fff;
-  color: #6b7280;
-  font-size: 13px;
-  font-weight: 500;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  overflow: hidden;
+}
+
+.stat-main-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.stat-main-card.expanded {
+  box-shadow: 0 8px 32px rgba(0, 180, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.stat-main-card.contracted {
+  margin-bottom: 12px;
+}
+
+.stat-nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.stat-nav-btn {
+  background: #f3f4f6;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  color: #6b7280;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.period-btn:hover {
-  border-color: #00B4FF;
-  color: #00B4FF;
-}
-
-.period-btn.active {
-  background: linear-gradient(135deg, #00B4FF, #009CE0);
-  border-color: #00B4FF;
+.stat-nav-btn:hover {
+  background: #00B4FF;
   color: #fff;
 }
+
+.stat-main-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.stat-main-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.stat-main-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.stat-combo-field {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  animation: slideDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.stat-combo-field .combo-item {
+  flex: 1;
+  min-width: 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.combo-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.combo-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.combo-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+
 
 .chart-container {
   width: 100%;
