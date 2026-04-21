@@ -12,45 +12,37 @@
       </button>
     </div>
 
-     <!-- Stats Row -->
-     <div class="stats-row">
-       <div class="stat-card">
-         <div class="stat-icon">
-           <img src="/resources/assets/total_guests_logo.svg" alt="Total Guests" class="stat-logo">
-         </div>
-         <div class="stat-info">
-           <div class="stat-value">{{ guests.length }}</div>
-           <div class="stat-label">Total Guests</div>
-         </div>
-       </div>
-       <div class="stat-card">
-         <div class="stat-icon">
-           <img src="/resources/assets/online_guests_logo.svg" alt="Online Guests" class="stat-logo">
-         </div>
-         <div class="stat-info">
-           <div class="stat-value">{{ onlineCount }}</div>
-           <div class="stat-label">Online Guests</div>
-         </div>
-       </div>
-       <div class="stat-card">
-         <div class="stat-icon">
-           <img src="/resources/assets/walkin_guests_logo.svg" alt="Walk-in Guests" class="stat-logo">
-         </div>
-         <div class="stat-info">
-           <div class="stat-value">{{ walkinCount }}</div>
-           <div class="stat-label">Walk-in Guests</div>
-         </div>
-       </div>
-       <div class="stat-card">
-         <div class="stat-icon">
-           <img src="/resources/assets/currently_staying_logo.svg" alt="Currently Staying" class="stat-logo">
-         </div>
-         <div class="stat-info">
-           <div class="stat-value">{{ stayingCount }}</div>
-           <div class="stat-label">Currently Staying</div>
-         </div>
-       </div>
-    </div>
+<!-- Stats Row -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="card-content">
+            <div class="stat-value">{{ guests.length }}</div>
+            <div class="stat-label">TOTAL GUESTS</div>
+          </div>
+          <img src="/resources/assets/total_guests_logo.svg" alt="Total Guests" class="stat-icon">
+        </div>
+        <div class="stat-card">
+          <div class="card-content">
+            <div class="stat-value">{{ onlineCount }}</div>
+            <div class="stat-label">ONLINE GUESTS</div>
+          </div>
+          <img src="/resources/assets/online_guests_logo.svg" alt="Online Guests" class="stat-icon">
+        </div>
+        <div class="stat-card">
+          <div class="card-content">
+            <div class="stat-value">{{ walkinCount }}</div>
+            <div class="stat-label">WALK-IN GUESTS</div>
+          </div>
+          <img src="/resources/assets/walkin_guests_logo.svg" alt="Walk-in Guests" class="stat-icon">
+        </div>
+        <div class="stat-card">
+          <div class="card-content">
+            <div class="stat-value">{{ stayingCount }}</div>
+            <div class="stat-label">CURRENTLY STAYING</div>
+          </div>
+          <img src="/resources/assets/currently_staying_logo.svg" alt="Currently Staying" class="stat-icon">
+        </div>
+      </div>
 
     <!-- Filter Bar -->
     <div class="filter-bar">
@@ -271,12 +263,12 @@
                 </div>
                 <div class="form-group">
                   <label class="form-label">Check-in Date <span v-if="needsBookingDates" class="required-dates">(Required)</span></label>
-                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_in" />
+                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_in" :min="new Date().toISOString().split('T')[0]" />
                   <span v-if="needsBookingDates" class="date-helper">Dates needed for booking</span>
                 </div>
                 <div class="form-group">
                   <label class="form-label">Check-out Date <span v-if="needsBookingDates" class="required-dates">(Required)</span></label>
-                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_out" />
+                  <input class="form-input" :class="{ 'date-required': needsBookingDates }" type="date" v-model="addForm.check_out" :min="minCheckOutDate" />
                 </div>
               </div>
               <div class="form-group">
@@ -313,9 +305,22 @@
                       <span class="room-preview-number">Room {{ room.number }}</span>
                       <span class="room-preview-name">{{ room.name }}</span>
                       <span class="room-type-pill" :class="{ 'room-type-pill-unavailable': !room.isAvailable }">{{ room.type }}</span>
-                      <span v-if="!room.isAvailable" class="room-unavailable-tag">🚫 Not Available</span>
+                      <span v-if="!room.isAvailable" class="room-unavailable-tag">Not Available</span>
                       <span v-else class="room-preview-price">₱{{ room.price_per_night.toLocaleString() }}/night</span>
-                      <span class="room-preview-cap">👥 Up to {{ room.capacity }}</span>
+                      <span class="room-preview-cap">Up to {{ room.capacity }} guests</span>
+                      <div v-if="bookingPriceSummary && room.isAvailable" class="price-breakdown">
+                        <div class="price-line">
+                          <span>₱{{ bookingPriceSummary.pricePerNight.toLocaleString() }} x {{ bookingPriceSummary.nights }} night{{ bookingPriceSummary.nights > 1 ? 's' : '' }}</span>
+                        </div>
+                        <div v-if="bookingPriceSummary.discount > 0" class="price-line price-original">
+                          <span>₱{{ bookingPriceSummary.originalTotal.toLocaleString() }}</span>
+                          <span class="discount-badge">{{ bookingPriceSummary.discount }}% off</span>
+                        </div>
+                        <div class="price-line price-total">
+                          <span>Total: ₱{{ bookingPriceSummary.discountedTotal.toLocaleString() }}</span>
+                        </div>
+                        <div class="price-dates">{{ bookingPriceSummary.dateRange }}</div>
+                      </div>
                     </div>
                   </template>
                 </div>
@@ -469,6 +474,38 @@ export default {
 
     needsBookingDates() {
       return this.addForm.createBooking && this.addForm.roomId;
+    },
+    bookingPriceSummary() {
+      if (!this.selectedRoom || !this.addForm.check_in || !this.addForm.check_out) return null;
+
+      const checkIn = new Date(this.addForm.check_in);
+      const checkOut = new Date(this.addForm.check_out);
+      const nights = Math.max(1, Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24)));
+
+      const pricePerNight = this.selectedRoom.price_per_night;
+      const discount = this.selectedRoom.discount || 0;
+      const originalTotal = pricePerNight * nights;
+      const discountedTotal = originalTotal - (originalTotal * discount / 100);
+
+      const formatDate = (date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      };
+
+      return {
+        nights,
+        pricePerNight,
+        discount,
+        originalTotal,
+        discountedTotal,
+        dateRange: `${formatDate(this.addForm.check_in)} - ${formatDate(this.addForm.check_out)}`
+      };
+    },
+    minCheckOutDate() {
+      if (!this.addForm.check_in) return '';
+      const checkIn = new Date(this.addForm.check_in);
+      checkIn.setDate(checkIn.getDate() + 1);
+      return checkIn.toISOString().split('T')[0];
     },
     roomsWithAvailability() {
       return this.rooms.map(room => ({
@@ -636,48 +673,60 @@ export default {
 }
 
 .stat-card {
+  position: relative;
   background: #fff;
-  border: 1px solid var(--admin-border, #E5E7EB);
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 18px 20px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
 }
 
-.stat-icon {
-  font-size: 26px;
-  line-height: 1;
+.stat-card:hover .stat-icon {
+  transform: translateY(-40px);
 }
 
-.stat-logo {
-  width: 32px;
-  height: 32px;
-  display: block;
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 
 .stat-value {
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--admin-text, #111827);
+  font-size: 36px;
+  font-weight: 300;
   line-height: 1;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: var(--admin-text-muted, #6B7280);
-  margin-top: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b0b0b0;
+  letter-spacing: 1px;
+  margin-top: 8px;
+  text-transform: uppercase;
 }
 
-.stat-info {
-  text-align: center;
+.stat-icon {
+  position: absolute;
+  right: -20px;
+  bottom: -60px;
+  width: 120px;
+  height: 120px;
+  z-index: 1;
+  opacity: 0.9;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ─── Filter Bar ─────────────────────── */
@@ -1219,6 +1268,47 @@ export default {
 .room-preview-cap {
   font-size: 11.5px;
   color: var(--admin-text-muted, #6B7280);
+}
+
+.price-breakdown {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.price-line {
+  font-size: 12px;
+  color: var(--admin-text, #374151);
+  margin-bottom: 4px;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #9CA3AF;
+  font-size: 11px;
+}
+
+.discount-badge {
+  background: #FEF3C7;
+  color: #D97706;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  font-weight: 600;
+}
+
+.price-total {
+  font-size: 14px;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 6px;
+}
+
+.price-dates {
+  font-size: 11px;
+  color: var(--admin-text-muted, #6B7280);
+  margin-top: 4px;
 }
 
 /* ─── Fade Transition ────────────────── */

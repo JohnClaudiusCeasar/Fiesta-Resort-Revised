@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\Guest;
+use App\Models\Room;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -95,13 +97,28 @@ class GuestController extends Controller
             $guest = Guest::create($guestData);
 
             if ($createBooking && ! empty($validated['room_id'])) {
+                $room = Room::find($validated['room_id']);
+                $pricePerNight = $room->price_per_night;
+                $discount = $room->discount ?? 0;
+                $nights = Carbon::parse($validated['check_out'])->diffInDays(Carbon::parse($validated['check_in']));
+                $nights = max(1, $nights);
+                $discountedPrice = $pricePerNight - ($pricePerNight * $discount / 100);
+                $totalPrice = $discountedPrice * $nights;
+
+                $lastBooking = Booking::orderBy('id', 'desc')->first();
+                $nextNumber = $lastBooking ? ((int) substr($lastBooking->booking_reference, -3) + 1) : 1;
+                $bookingReference = 'FR-'.date('Y').'-'.str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+
                 Booking::create([
                     'guest_id' => $guest->id,
                     'room_id' => $validated['room_id'],
+                    'booking_reference' => $bookingReference,
                     'check_in' => $validated['check_in'],
                     'check_out' => $validated['check_out'],
                     'status' => 'Confirmed',
                     'guest_count' => 1,
+                    'total_price' => $totalPrice,
+                    'payment_status' => 'paid',
                 ]);
 
                 return back()->with('success', "Guest \"{$guest->name}\" registered and booked successfully.");
